@@ -4,9 +4,6 @@
 
 The CrediPredict Credit Eligibility Assessment Application is a comprehensive, production-ready web application that revolutionizes credit card and loan approval processes through advanced artificial intelligence and machine learning technologies. This system addresses the critical challenges faced by financial institutions in making accurate, consistent, and risk-aware credit decisions while maintaining regulatory compliance and operational efficiency.
 
-### Demo 
-🎬 [Watch Demo Video](https://youtu.be/5bx6Q87ukvE)
-
 ### Project Overview
 
 Traditional credit approval processes rely heavily on manual assessment, leading to inconsistencies, lengthy processing times, and suboptimal risk management. This application leverages state-of-the-art machine learning ensemble models to provide instant, data-driven credit decisions with exceptional accuracy and transparency.
