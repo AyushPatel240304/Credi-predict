@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+
+{% block title %}Credit Assessment Form{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        background: linear-gradient(135deg, 
+            rgba(248, 250, 252, 1) 0%, 
+            rgba(241, 245, 249, 1) 50%, 
+            rgba(248, 250, 252, 1) 100%);
+        min-height: 100vh;
+        padding: 8rem 0 2rem 0;
+    }
+    
+    .modern-form-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s ease;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #64748b, #475569);
+        border-radius: 16px 16px 0 0;
+        padding: 2rem;
+        color: white;
+        text-align: center;
+    }
+    
+    .form-section {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(226, 232, 240, 0.4);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #64748b;
+        box-shadow: 0 0 0 0.2rem rgba(100, 116, 139, 0.25);
+        background: white;
+    }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #64748b, #475569);
+        border: none;
+        color: white;
+        padding: 1rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.3);
+        background: linear-gradient(135deg, #475569, #334155);
+        color: white;
+    }
+    
+    /* Validation Styles */
+    .form-control.is-valid,
+    .form-select.is-valid {
+        border-color: #059669;
+        background-image: none;
+    }
+    
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+        border-color: #dc2626;
+        background-image: none;
+    }
+    
+    .form-control.is-warning,
+    .form-select.is-warning {
+        border-color: #d97706;
+        background-image: none;
+    }
+    
+    .form-control.is-info,
+    .form-select.is-info {
+        border-color: #0284c7;
+        background-image: none;
+    }
+    
+    .validation-feedback {
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.9);
+        border-left: 3px solid;
+    }
+    
+    .validation-feedback.text-danger {
+        color: #dc2626 !important;
+        border-left-color: #dc2626;
+        background: rgba(220, 38, 38, 0.05);
+    }
+    
+    .validation-feedback.text-warning {
+        color: #d97706 !important;
+        border-left-color: #d97706;
+        background: rgba(217, 119, 6, 0.05);
+    }
+    
+    .validation-feedback.text-success {
+        color: #059669 !important;
+        border-left-color: #059669;
+        background: rgba(5, 150, 105, 0.05);
+    }
+    
+    .validation-feedback.text-info {
+        color: #0284c7 !important;
+        border-left-color: #0284c7;
+        background: rgba(2, 132, 199, 0.05);
+    }
+    
+    .form-error-message {
+        border-radius: 8px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    /* Focus states for validation */
+    .form-control:focus.is-valid,
+    .form-select:focus.is-valid {
+        border-color: #059669;
+        box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.25);
+    }
+    
+    .form-control:focus.is-invalid,
+    .form-select:focus.is-invalid {
+        border-color: #dc2626;
+        box-shadow: 0 0 0 0.2rem rgba(220, 38, 38, 0.25);
+    }
+    
+    .form-control:focus.is-warning,
+    .form-select:focus.is-warning {
+        border-color: #d97706;
+        box-shadow: 0 0 0 0.2rem rgba(217, 119, 6, 0.25);
+    }
+    
+    .form-control:focus.is-info,
+    .form-select:focus.is-info {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 0.2rem rgba(2, 132, 199, 0.25);
+    }
+</style>
+
+<div class="form-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="modern-form-card">
+                    <div class="form-header">
+                        <h1><i class="bi bi-shield-check me-2"></i>Credit Assessment Form</h1>
+                        <p class="mb-0 opacity-90">Fill in your details to get an instant credit eligibility assessment</p>
+                    </div>
+                    
+                    <div class="p-4">
+                        <form action="{{ url_for('predict_single_route') }}" method="POST">
+                            <!-- Personal Information -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-person-circle"></i>
+                                    Personal Information
+                                </h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="gender" class="form-label">Gender</label>
+                                        <select class="form-select" id="gender" name="gender" required>
+                                            <option value="">Select Gender</option>
+                                            <option value="M">Male</option>
+                                            <option value="F">Female</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="children" class="form-label">Number of Children</label>
+                                        <input type="number" class="form-control" id="children" name="children" min="0" max="20" value="0" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="age" class="form-label">Age (years)</label>
+                                        <input type="number" class="form-control" id="age" name="age" min="18" max="100" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="family_status" class="form-label">Family Status</label>
+                                        <select class="form-select" id="family_status" name="family_status" required>
+                                            <option value="">Select Status</option>
+                                            <option value="Single / not married">Single / not married</option>
+                                            <option value="Married">Married</option>
+                                            <option value="Civil marriage">Civil marriage</option>
+                                            <option value="Widow">Widow</option>
+                                            <option value="Separated">Separated</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Education & Income -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-mortarboard"></i>
+                                    Education & Income
+                                </h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="education_type" class="form-label">Education Level</label>
+                                        <select class="form-select" id="education_type" name="education_type" required>
+                                            <option value="">Select Education</option>
+                                            <option value="Secondary / secondary special">Secondary / secondary special</option>
+                                            <option value="Higher education">Higher education</option>
+                                            <option value="Incomplete higher">Incomplete higher</option>
+                                            <option value="Lower secondary">Lower secondary</option>
+                                            <option value="Academic degree">Academic degree</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="income_type" class="form-label">Income Type</label>
+                                        <select class="form-select" id="income_type" name="income_type" required>
+                                            <option value="">Select Income Type</option>
+                                            <option value="Working">Working</option>
+                                            <option value="State servant">State servant</option>
+                                            <option value="Commercial associate">Commercial associate</option>
+                                            <option value="Pensioner">Pensioner</option>
+                                            <option value="Unemployed">Unemployed</option>
+                                            <option value="Student">Student</option>
+                                            <option value="Businessman">Businessman</option>
+                                            <option value="Maternity leave">Maternity leave</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="income" class="form-label">Annual Income ($)</label>
+                                        <input type="number" class="form-control" id="income" name="income" min="0" step="1000" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="employment_days" class="form-label">Days Employed (negative for unemployed)</label>
+                                        <input type="number" class="form-control" id="employment_days" name="employment_days" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Assets & Housing -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-house"></i>
+                                    Assets & Housing
+                                </h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="own_car" class="form-label">Do you own a car?</label>
+                                        <select class="form-select" id="own_car" name="own_car" required>
+                                            <option value="">Select Option</option>
+                                            <option value="Y">Yes</option>
+                                            <option value="N">No</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="own_realty" class="form-label">Do you own real estate?</label>
+                                        <select class="form-select" id="own_realty" name="own_realty" required>
+                                            <option value="">Select Option</option>
+                                            <option value="Y">Yes</option>
+                                            <option value="N">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="housing_type" class="form-label">Housing Type</label>
+                                        <select class="form-select" id="housing_type" name="housing_type" required>
+                                            <option value="">Select Housing Type</option>
+                                            <option value="House / apartment">House / apartment</option>
+                                            <option value="With parents">With parents</option>
+                                            <option value="Municipal apartment">Municipal apartment</option>
+                                            <option value="Rented apartment">Rented apartment</option>
+                                            <option value="Office apartment">Office apartment</option>
+                                            <option value="Co-op apartment">Co-op apartment</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="occupation_type" class="form-label">Occupation Type</label>
+                                        <select class="form-select" id="occupation_type" name="occupation_type">
+                                            <option value="">Select Occupation (Optional)</option>
+                                            <option value="Laborers">Laborers</option>
+                                            <option value="Core staff">Core staff</option>
+                                            <option value="Managers">Managers</option>
+                                            <option value="Drivers">Drivers</option>
+                                            <option value="High skill tech staff">High skill tech staff</option>
+                                            <option value="Accountants">Accountants</option>
+                                            <option value="Medicine staff">Medicine staff</option>
+                                            <option value="Security staff">Security staff</option>
+                                            <option value="Cooking staff">Cooking staff</option>
+                                            <option value="Cleaning staff">Cleaning staff</option>
+                                            <option value="Private service staff">Private service staff</option>
+                                            <option value="Low-skill Laborers">Low-skill Laborers</option>
+                                            <option value="Waiters/barmen staff">Waiters/barmen staff</option>
+                                            <option value="Secretaries">Secretaries</option>
+                                            <option value="Realty agents">Realty agents</option>
+                                            <option value="Sales staff">Sales staff</option>
+                                            <option value="HR staff">HR staff</option>
+                                            <option value="IT staff">IT staff</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Family Information -->
+                            <div class="form-section">
+                                <h3 class="section-title">
+                                    <i class="bi bi-people"></i>
+                                    Family Information
+                                </h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="family_members" class="form-label">Family Size</label>
+                                        <input type="number" class="form-control" id="family_members" name="family_members" min="1" max="20" value="1" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-submit">
+                                    <i class="bi bi-search me-2"></i>
+                                    Process Application
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation and logic
+    const form = document.querySelector('form');
+    const ageInput = document.getElementById('age');
+    const incomeInput = document.getElementById('income');
+    const employmentDaysInput = document.getElementById('employment_days');
+    const childrenInput = document.getElementById('children');
+    const familyMembersInput = document.getElementById('family_members');
+    const incomeTypeSelect = document.getElementById('income_type');
+    const familyStatusSelect = document.getElementById('family_status');
+    const educationSelect = document.getElementById('education_type');
+    
+    // Real-time validation
+    ageInput.addEventListener('input', validateAge);
+    incomeInput.addEventListener('input', validateIncome);
+    employmentDaysInput.addEventListener('input', validateEmployment);
+    childrenInput.addEventListener('input', validateChildren);
+    familyMembersInput.addEventListener('input', validateFamilySize);
+    incomeTypeSelect.addEventListener('change', validateIncomeType);
+    familyStatusSelect.addEventListener('change', validateFamilyStatus);
+    
+    // Age validation
+    function validateAge() {
+        const age = parseInt(ageInput.value);
+        const feedback = document.getElementById('age-feedback') || createFeedback('age-feedback', ageInput);
+        
+        if (age < 18) {
+            showError(ageInput, feedback, 'You must be at least 18 years old to apply for credit.');
+        } else if (age > 100) {
+            showError(ageInput, feedback, 'Please enter a valid age.');
+        } else if (age < 21) {
+            showWarning(ageInput, feedback, 'Young applicants may face additional requirements.');
+        } else {
+            showSuccess(ageInput, feedback, 'Valid age range.');
+        }
+    }
+    
+    // Income validation
+    function validateIncome() {
+        const income = parseFloat(incomeInput.value);
+        const feedback = document.getElementById('income-feedback') || createFeedback('income-feedback', incomeInput);
+        
+        if (income < 0) {
+            showError(incomeInput, feedback, 'Income cannot be negative.');
+        } else if (income < 12000) {
+            showWarning(incomeInput, feedback, 'Low income may affect approval chances.');
+        } else if (income > 1000000) {
+            showWarning(incomeInput, feedback, 'Please verify this high income amount.');
+        } else if (income >= 30000) {
+            showSuccess(incomeInput, feedback, 'Good income level for credit approval.');
+        } else {
+            showInfo(incomeInput, feedback, 'Consider documenting additional income sources.');
+        }
+    }
+    
+    // Employment validation
+    function validateEmployment() {
+        const days = parseInt(employmentDaysInput.value);
+        const incomeType = incomeTypeSelect.value;
+        const feedback = document.getElementById('employment-feedback') || createFeedback('employment-feedback', employmentDaysInput);
+        
+        if (incomeType === 'Unemployed' && days > 0) {
+            showError(employmentDaysInput, feedback, 'Employment days should be negative if unemployed.');
+        } else if (incomeType !== 'Unemployed' && days < 0) {
+            showError(employmentDaysInput, feedback, 'Employment days should be positive if employed.');
+        } else if (days < -3650) {
+            showWarning(employmentDaysInput, feedback, 'Long unemployment period may affect approval.');
+        } else if (days > 0 && days < 90) {
+            showWarning(employmentDaysInput, feedback, 'Short employment history may require additional verification.');
+        } else if (days >= 365) {
+            showSuccess(employmentDaysInput, feedback, 'Stable employment history.');
+        } else {
+            clearFeedback(employmentDaysInput, feedback);
+        }
+    }
+    
+    // Children validation
+    function validateChildren() {
+        const children = parseInt(childrenInput.value);
+        const familyMembers = parseInt(familyMembersInput.value);
+        const feedback = document.getElementById('children-feedback') || createFeedback('children-feedback', childrenInput);
+        
+        if (children < 0) {
+            showError(childrenInput, feedback, 'Number of children cannot be negative.');
+        } else if (children > 10) {
+            showWarning(childrenInput, feedback, 'Large number of dependents may affect assessment.');
+        } else if (familyMembers && children >= familyMembers) {
+            showError(childrenInput, feedback, 'Children count cannot exceed total family members.');
+        } else {
+            clearFeedback(childrenInput, feedback);
+        }
+        
+        // Re-validate family size when children count changes
+        if (familyMembers) validateFamilySize();
+    }
+    
+    // Family size validation
+    function validateFamilySize() {
+        const familyMembers = parseInt(familyMembersInput.value);
+        const children = parseInt(childrenInput.value) || 0;
+        const feedback = document.getElementById('family-feedback') || createFeedback('family-feedback', familyMembersInput);
+        
+        if (familyMembers < 1) {
+            showError(familyMembersInput, feedback, 'Family size must be at least 1.');
+        } else if (familyMembers > 20) {
+            showWarning(familyMembersInput, feedback, 'Unusually large family size.');
+        } else if (children && familyMembers <= children) {
+            showError(familyMembersInput, feedback, 'Family size must be larger than number of children.');
+        } else {
+            clearFeedback(familyMembersInput, feedback);
+        }
+    }
+    
+    // Income type validation
+    function validateIncomeType() {
+        const incomeType = incomeTypeSelect.value;
+        const age = parseInt(ageInput.value);
+        const income = parseFloat(incomeInput.value);
+        const feedback = document.getElementById('income-type-feedback') || createFeedback('income-type-feedback', incomeTypeSelect);
+        
+        if (incomeType === 'Student' && age > 30) {
+            showWarning(incomeTypeSelect, feedback, 'Student status unusual for this age group.');
+        } else if (incomeType === 'Pensioner' && age < 60) {
+            showWarning(incomeTypeSelect, feedback, 'Early retirement may require documentation.');
+        } else if (incomeType === 'Unemployed' && income > 0) {
+            showWarning(incomeTypeSelect, feedback, 'Please verify income source if unemployed.');
+        } else if (incomeType === 'Maternity leave' && income > 100000) {
+            showWarning(incomeTypeSelect, feedback, 'High income unusual for maternity leave.');
+        } else {
+            clearFeedback(incomeTypeSelect, feedback);
+        }
+        
+        // Re-validate employment when income type changes
+        validateEmployment();
+    }
+    
+    // Family status validation
+    function validateFamilyStatus() {
+        const familyStatus = familyStatusSelect.value;
+        const children = parseInt(childrenInput.value) || 0;
+        const feedback = document.getElementById('family-status-feedback') || createFeedback('family-status-feedback', familyStatusSelect);
+        
+        if (familyStatus === 'Single / not married' && children > 3) {
+            showInfo(familyStatusSelect, feedback, 'Single parent with multiple children may need additional support documentation.');
+        } else if (familyStatus === 'Widow' && children === 0) {
+            showInfo(familyStatusSelect, feedback, 'Widowed status may affect income stability assessment.');
+        } else {
+            clearFeedback(familyStatusSelect, feedback);
+        }
+    }
+    
+    // Logical consistency checks
+    function validateLogicalConsistency() {
+        const errors = [];
+        
+        // Age vs Education consistency
+        const age = parseInt(ageInput.value);
+        const education = educationSelect.value;
+        if (age < 22 && education === 'Higher education') {
+            errors.push('Higher education unusual for age under 22.');
+        }
+        if (age < 25 && education === 'Academic degree') {
+            errors.push('Academic degree unusual for age under 25.');
+        }
+        
+        // Income vs Age consistency
+        const income = parseFloat(incomeInput.value);
+        if (age < 25 && income > 100000) {
+            errors.push('Very high income unusual for young age.');
+        }
+        
+        // Family consistency
+        const children = parseInt(childrenInput.value) || 0;
+        const familyMembers = parseInt(familyMembersInput.value) || 1;
+        const familyStatus = familyStatusSelect.value;
+        
+        if (familyStatus === 'Single / not married' && familyMembers > children + 1) {
+            errors.push('Family size seems inconsistent with single status.');
+        }
+        
+        return errors;
+    }
+    
+    // Helper functions for feedback display
+    function createFeedback(id, element) {
+        const feedback = document.createElement('div');
+        feedback.id = id;
+        feedback.className = 'validation-feedback mt-1';
+        element.parentNode.appendChild(feedback);
+        return feedback;
+    }
+    
+    function showError(element, feedback, message) {
+        element.classList.remove('is-valid', 'is-warning', 'is-info');
+        element.classList.add('is-invalid');
+        feedback.className = 'validation-feedback mt-1 text-danger';
+        feedback.innerHTML = `<i class="bi bi-exclamation-circle me-1"></i>${message}`;
+        feedback.style.display = 'block';
+    }
+    
+    function showWarning(element, feedback, message) {
+        element.classList.remove('is-invalid', 'is-valid', 'is-info');
+        element.classList.add('is-warning');
+        feedback.className = 'validation-feedback mt-1 text-warning';
+        feedback.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>${message}`;
+        feedback.style.display = 'block';
+    }
+    
+    function showSuccess(element, feedback, message) {
+        element.classList.remove('is-invalid', 'is-warning', 'is-info');
+        element.classList.add('is-valid');
+        feedback.className = 'validation-feedback mt-1 text-success';
+        feedback.innerHTML = `<i class="bi bi-check-circle me-1"></i>${message}`;
+        feedback.style.display = 'block';
+    }
+    
+    function showInfo(element, feedback, message) {
+        element.classList.remove('is-invalid', 'is-warning', 'is-valid');
+        element.classList.add('is-info');
+        feedback.className = 'validation-feedback mt-1 text-info';
+        feedback.innerHTML = `<i class="bi bi-info-circle me-1"></i>${message}`;
+        feedback.style.display = 'block';
+    }
+    
+    function clearFeedback(element, feedback) {
+        element.classList.remove('is-invalid', 'is-warning', 'is-valid', 'is-info');
+        feedback.style.display = 'none';
+    }
+    
+    // Form submission validation
+    form.addEventListener('submit', function(e) {
+        // Run all validations
+        validateAge();
+        validateIncome();
+        validateEmployment();
+        validateChildren();
+        validateFamilySize();
+        validateIncomeType();
+        validateFamilyStatus();
+        
+        // Check logical consistency
+        const consistencyErrors = validateLogicalConsistency();
+        
+        // Check for any validation errors
+        const hasErrors = document.querySelectorAll('.is-invalid').length > 0;
+        
+        if (hasErrors) {
+            e.preventDefault();
+            showFormError('Please fix the highlighted errors before submitting.');
+            return false;
+        }
+        
+        if (consistencyErrors.length > 0) {
+            e.preventDefault();
+            const confirmed = confirm(
+                'The following inconsistencies were detected:\n\n' + 
+                consistencyErrors.join('\n') + 
+                '\n\nDo you want to continue anyway?'
+            );
+            if (!confirmed) {
+                return false;
+            }
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 10 seconds in case of issues
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 10000);
+    });
+    
+    function showFormError(message) {
+        // Remove existing error
+        const existingError = document.querySelector('.form-error-message');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Create new error message
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger form-error-message';
+        errorDiv.innerHTML = `<i class="bi bi-exclamation-triangle me-2"></i>${message}`;
+        
+        // Insert at top of form
+        form.insertBefore(errorDiv, form.firstChild);
+        
+        // Scroll to error
+        errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+    
+    // Initialize validations on page load
+    if (ageInput.value) validateAge();
+    if (incomeInput.value) validateIncome();
+    if (employmentDaysInput.value) validateEmployment();
+    if (childrenInput.value) validateChildren();
+    if (familyMembersInput.value) validateFamilySize();
+    if (incomeTypeSelect.value) validateIncomeType();
+    if (familyStatusSelect.value) validateFamilyStatus();
+});
+</script>
+{% endblock %}

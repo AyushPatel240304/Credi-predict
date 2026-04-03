@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Assessment Results{% endblock %}
+
+{% block content %}
+<style>
+    .results-container {
+        background: linear-gradient(135deg, 
+            rgba(248, 250, 252, 1) 0%, 
+            rgba(241, 245, 249, 1) 50%, 
+            rgba(248, 250, 252, 1) 100%);
+        min-height: 100vh;
+        padding: 8rem 0 2rem 0;
+    }
+    
+    .results-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .results-header {
+        background: linear-gradient(135deg, #64748b, #475569);
+        padding: 2rem;
+        color: white;
+        position: relative;
+    }
+    
+    .results-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="0.8" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    }
+    
+    .results-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .results-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding: 2rem;
+        background: rgba(248, 250, 252, 0.5);
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-card.approved {
+        border-color: rgba(5, 150, 105, 0.3);
+    }
+    
+    .stat-card.rejected {
+        border-color: rgba(220, 38, 38, 0.3);
+    }
+    
+    .stat-card.review {
+        border-color: rgba(217, 119, 6, 0.3);
+    }
+    
+    .stat-card.total {
+        border-color: rgba(100, 116, 139, 0.3);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+        background: linear-gradient(135deg, #64748b, #475569);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-number.approved {
+        background: linear-gradient(135deg, #059669, #047857);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-number.rejected {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-number.review {
+        background: linear-gradient(135deg, #d97706, #b45309);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .table-container {
+        padding: 2rem;
+        background: white;
+    }
+    
+    .table-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .table-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    
+    .table-filters {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid transparent;
+        border-radius: 8px;
+        background: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .filter-btn.active, .filter-btn:hover {
+        background: #64748b;
+        color: white;
+        border-color: #64748b;
+    }
+    
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .results-table thead {
+        background: linear-gradient(135deg, #64748b, #475569);
+        color: white;
+    }
+    
+    .results-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+        border: none;
+    }
+    
+    .results-table td {
+        padding: 1rem;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+        vertical-align: middle;
+    }
+    
+    .results-table tbody tr:hover {
+        background: rgba(100, 116, 139, 0.05);
+    }
+    
+    .results-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+    
+    .status-approved {
+        background: rgba(5, 150, 105, 0.1);
+        color: #059669;
+        border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+    
+    .status-rejected {
+        background: rgba(220, 38, 38, 0.1);
+        color: #dc2626;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+    
+    .status-review {
+        background: rgba(217, 119, 6, 0.1);
+        color: #d97706;
+        border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+    
+    .risk-bar {
+        width: 100px;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        overflow: hidden;
+        position: relative;
+    }
+    
+    .risk-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+    
+    .risk-low { background: linear-gradient(90deg, #059669, #10b981); }
+    .risk-medium { background: linear-gradient(90deg, #d97706, #f59e0b); }
+    .risk-high { background: linear-gradient(90deg, #dc2626, #ef4444); }
+    
+    .export-section {
+        padding: 2rem;
+        background: rgba(248, 250, 252, 0.5);
+        border-top: 1px solid rgba(226, 232, 240, 0.5);
+        text-align: center;
+    }
+    
+    .export-btn {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+        margin: 0 0.5rem;
+    }
+    
+    .export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+        background: linear-gradient(135deg, #047857, #065f46);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination-btn {
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(100, 116, 139, 0.3);
+        background: white;
+        color: #64748b;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .pagination-btn:hover, .pagination-btn.active {
+        background: #64748b;
+        color: white;
+        border-color: #64748b;
+    }
+    
+    .search-box {
+        padding: 0.75rem 1rem;
+        border: 2px solid rgba(226, 232, 240, 0.5);
+        border-radius: 10px;
+        font-size: 0.9rem;
+        background: white;
+        transition: all 0.3s ease;
+        width: 250px;
+    }
+    
+    .search-box:focus {
+        outline: none;
+        border-color: #64748b;
+        box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+    }
+</style>
+
+<div class="results-container">
+    <div class="container-fluid">
+        <div class="row justify-content-center">
+            <div class="col-12 col-xl-11">
+                <div class="results-card">
+                    <!-- Header -->
+                    <div class="results-header">
+                        <h1 class="results-title">
+                            <i class="bi bi-bar-chart me-3"></i>
+                            Bulk Assessment Results
+                        </h1>
+                        <p class="results-subtitle">Analysis complete - {{ total_count }} applications processed</p>
+                    </div>
+                    
+                    <!-- Statistics -->
+                    <div class="stats-grid">
+                        <div class="stat-card total">
+                            <div class="stat-number">{{ total_count }}</div>
+                            <div class="stat-label">Total Applications</div>
+                        </div>
+                        <div class="stat-card approved">
+                            <div class="stat-number approved">{{ approved_count }}</div>
+                            <div class="stat-label">Approved</div>
+                        </div>
+                        <div class="stat-card rejected">
+                            <div class="stat-number rejected">{{ rejected_count }}</div>
+                            <div class="stat-label">Rejected</div>
+                        </div>
+                        <div class="stat-card review">
+                            <div class="stat-number review">{{ review_count }}</div>
+                            <div class="stat-label">Manual Review</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Table Container -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3 class="table-title">Detailed Results</h3>
+                            <div class="table-filters">
+                                <input type="text" class="search-box" placeholder="Search applications..." id="searchBox">
+                                <button class="filter-btn active" data-filter="all">All</button>
+                                <button class="filter-btn" data-filter="APPROVED">Approved</button>
+                                <button class="filter-btn" data-filter="REJECTED">Rejected</button>
+                                <button class="filter-btn" data-filter="MANUAL REVIEW">Review</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Table -->
+                        <div class="table-responsive">
+                            <table class="results-table" id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Application ID</th>
+                                        <th>Income</th>
+                                        <th>Age</th>
+                                        <th>Risk Level</th>
+                                        <th>Risk %</th>
+                                        <th>Decision</th>
+                                        <th>Recommendation</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in results %}
+                                    <tr data-decision="{{ result.Decision }}">
+                                        <td>
+                                            <strong>#{{ loop.index }}</strong>
+                                        </td>
+                                        <td>
+                                            <strong>${{ "{:,.0f}".format(result.AMT_INCOME_TOTAL) }}</strong>
+                                        </td>
+                                        <td>{{ result.AGE_YEARS }} years</td>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="risk-bar">
+                                                    <div class="risk-fill 
+                                                        {% if result.Risk_Probability < 30 %}risk-low
+                                                        {% elif result.Risk_Probability < 60 %}risk-medium
+                                                        {% else %}risk-high{% endif %}" 
+                                                        style="width: {{ result.Risk_Probability }}%"></div>
+                                                </div>
+                                                <small class="text-muted">{{ result.Risk_Level }}</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <strong class="
+                                                {% if result.Risk_Probability < 30 %}text-success
+                                                {% elif result.Risk_Probability < 60 %}text-warning
+                                                {% else %}text-danger{% endif %}">
+                                                {{ result.Risk_Probability }}%
+                                            </strong>
+                                        </td>
+                                        <td>
+                                            <span class="status-badge 
+                                                {% if result.Decision == 'APPROVED' %}status-approved
+                                                {% elif result.Decision == 'REJECTED' %}status-rejected
+                                                {% else %}status-review{% endif %}">
+                                                {{ result.Decision }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">{{ result.Recommendation[:50] }}{% if result.Recommendation|length > 50 %}...{% endif %}</small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <div class="pagination-container" id="paginationContainer">
+                            <!-- Pagination will be dynamically generated -->
+                        </div>
+                    </div>
+                    
+                    <!-- Export Section -->
+                    <div class="export-section">
+                        <h5 class="mb-3" style="color: #374151; font-weight: 600;">Export Results</h5>
+                        <a href="#" class="export-btn" onclick="exportToCSV()">
+                            <i class="bi bi-file-earmark-spreadsheet"></i>
+                            Export to CSV
+                        </a>
+                        <a href="{{ url_for('batch_prediction') }}" class="export-btn" style="background: linear-gradient(135deg, #64748b, #475569);">
+                            <i class="bi bi-arrow-repeat"></i>
+                            New Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const table = document.getElementById('resultsTable');
+    const searchBox = document.getElementById('searchBox');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const tbody = table.querySelector('tbody');
+    const originalRows = Array.from(tbody.querySelectorAll('tr'));
+    
+    let currentFilter = 'all';
+    let currentPage = 1;
+    const rowsPerPage = 20;
+    
+    // Search functionality
+    searchBox.addEventListener('input', function() {
+        filterAndPaginate();
+    });
+    
+    // Filter functionality
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            currentFilter = this.dataset.filter;
+            currentPage = 1;
+            filterAndPaginate();
+        });
+    });
+    
+    function filterAndPaginate() {
+        let filteredRows = originalRows.filter(row => {
+            const decision = row.dataset.decision;
+            const searchTerm = searchBox.value.toLowerCase();
+            const rowText = row.textContent.toLowerCase();
+            
+            const matchesFilter = currentFilter === 'all' || decision === currentFilter;
+            const matchesSearch = rowText.includes(searchTerm);
+            
+            return matchesFilter && matchesSearch;
+        });
+        
+        // Clear current table
+        tbody.innerHTML = '';
+        
+        // Calculate pagination
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const pageRows = filteredRows.slice(startIndex, endIndex);
+        
+        // Add rows for current page
+        pageRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
+        
+        // Update pagination
+        updatePagination(totalPages);
+    }
+    
+    function updatePagination(totalPages) {
+        const container = document.getElementById('paginationContainer');
+        container.innerHTML = '';
+        
+        if (totalPages <= 1) return;
+        
+        // Previous button
+        if (currentPage > 1) {
+            const prevBtn = createPaginationBtn('‹', currentPage - 1);
+            container.appendChild(prevBtn);
+        }
+        
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === currentPage || i === 1 || i === totalPages || Math.abs(i - currentPage) <= 1) {
+                const pageBtn = createPaginationBtn(i, i);
+                if (i === currentPage) pageBtn.classList.add('active');
+                container.appendChild(pageBtn);
+            } else if (i === currentPage - 2 || i === currentPage + 2) {
+                const dots = document.createElement('span');
+                dots.textContent = '...';
+                dots.style.padding = '0.5rem';
+                dots.style.color = '#6b7280';
+                container.appendChild(dots);
+            }
+        }
+        
+        // Next button
+        if (currentPage < totalPages) {
+            const nextBtn = createPaginationBtn('›', currentPage + 1);
+            container.appendChild(nextBtn);
+        }
+    }
+    
+    function createPaginationBtn(text, page) {
+        const btn = document.createElement('button');
+        btn.className = 'pagination-btn';
+        btn.textContent = text;
+        btn.addEventListener('click', function() {
+            currentPage = page;
+            filterAndPaginate();
+        });
+        return btn;
+    }
+    
+    // Initialize
+    filterAndPaginate();
+});
+
+function exportToCSV() {
+    const table = document.getElementById('resultsTable');
+    const rows = Array.from(table.querySelectorAll('tr'));
+    
+    const csv = rows.map(row => {
+        const cells = Array.from(row.querySelectorAll('th, td'));
+        return cells.map(cell => {
+            const text = cell.textContent.replace(/"/g, '""');
+            return `"${text}"`;
+        }).join(',');
+    }).join('\\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'credit_assessment_results.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}CrediPredict - Check Your Credit Eligibility{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <!-- Floating Particles -->
+    <div class="hero-particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8 text-center hero-content">
+                <h1 class="display-2 fw-bold mb-4 hero-title">
+                    Check Your Credit 
+                    <span class="floating-animation">Eligibility</span>
+                </h1>
+                <p class="lead mb-5 opacity-90 hero-subtitle fs-4">
+                    Get an instant assessment of your credit application potential. 
+                    Know where you stand before applying anywhere.
+                </p>
+                <div class="d-flex gap-4 flex-wrap justify-content-center hero-buttons">
+                    <a href="{{ url_for('single_prediction') }}" class="btn btn-light btn-lg px-5 py-3 fs-5">
+                        <i class="bi bi-search me-2"></i>
+                        Check Eligibility
+                    </a>
+                    <a href="#features" class="btn btn-outline-light btn-lg px-5 py-3 fs-5">
+                        <i class="bi bi-info-circle me-2"></i>
+                        How It Works
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="bg-white">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-lg-8 mx-auto">
+                <h2 class="h1 fw-bold mb-3">How This Tool Helps You</h2>
+                <p class="lead text-muted">
+                    Get insights into your credit application potential before applying anywhere
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-5">
+            <!-- Individual Check -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <div class="step-indicator mx-auto mb-4">1</div>
+                        <h4 class="h5 fw-bold mb-3">Personal Assessment</h4>
+                        <p class="text-muted mb-4">
+                            Check your individual credit eligibility with our assessment tool. 
+                            See where you stand in just minutes.
+                        </p>
+                        <a href="{{ url_for('single_prediction') }}" class="btn btn-primary">
+                            Check My Eligibility
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bulk Analysis -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <div class="step-indicator mx-auto mb-4" style="background: var(--accent-color);">2</div>
+                        <h4 class="h5 fw-bold mb-3">Bulk Analysis</h4>
+                        <p class="text-muted mb-4">
+                            Bank professionals can analyze multiple applications 
+                            at once using CSV file upload.
+                        </p>
+                        <a href="{{ url_for('batch_prediction') }}" class="btn btn-success">
+                            Analyze Multiple
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Insights -->
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-5">
+                        <div class="step-indicator mx-auto mb-4" style="background: #f59e0b;">3</div>
+                        <h4 class="h5 fw-bold mb-3">Get Insights</h4>
+                        <p class="text-muted mb-4">
+                            Receive detailed feedback and suggestions to improve 
+                            your credit application chances.
+                        </p>
+                        <div class="btn btn-outline-secondary disabled">
+                            <i class="bi bi-lightbulb me-1"></i>
+                            Smart Insights
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trust Section -->
+<section class="bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="h1 fw-bold mb-4">Trusted Assessment Tool</h2>
+                <p class="lead text-muted mb-4">
+                    Our AI-powered tool helps you understand your credit application potential 
+                    before you apply anywhere. No impact on your credit score.
+                </p>
+                <div class="row g-4">
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h3 class="h2 fw-bold text-primary">10K+</h3>
+                            <p class="text-muted">Assessments Completed</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center">
+                            <h3 class="h2 fw-bold text-primary">95%</h3>
+                            <p class="text-muted">Accuracy Rate</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-5">
+                        <h5 class="fw-bold mb-3">
+                            <i class="bi bi-info-circle text-primary me-2"></i>
+                            Important Disclaimer
+                        </h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                This is an assessment tool, not a credit provider
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                No impact on your actual credit score
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Get insights before applying elsewhere
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Results are for guidance purposes only
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

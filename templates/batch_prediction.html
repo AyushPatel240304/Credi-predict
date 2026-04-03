@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Bulk Credit Assessment{% endblock %}
+
+{% block content %}
+<style>
+    .batch-container {
+        background: linear-gradient(135deg, 
+            rgba(248, 250, 252, 1) 0%, 
+            rgba(241, 245, 249, 1) 50%, 
+            rgba(248, 250, 252, 1) 100%);
+        min-height: 100vh;
+        padding: 8rem 0 2rem 0;
+    }
+    
+    .upload-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+        transition: all 0.4s ease;
+        overflow: hidden;
+    }
+    
+    .upload-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 50px rgba(0, 0, 0, 0.12);
+    }
+    
+    .upload-header {
+        background: linear-gradient(135deg, #64748b, #475569);
+        padding: 2.5rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+    
+    .upload-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    }
+    
+    .upload-title {
+        color: white;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .upload-subtitle {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 1.1rem;
+        margin: 0;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .drop-zone {
+        border: 3px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        background: rgba(248, 250, 252, 0.5);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .drop-zone:hover {
+        border-color: #64748b;
+        background: rgba(100, 116, 139, 0.05);
+        transform: scale(1.02);
+    }
+    
+    .drop-zone.dragover {
+        border-color: #059669;
+        background: rgba(5, 150, 105, 0.1);
+        transform: scale(1.02);
+    }
+    
+    .upload-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #64748b, #475569);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+        box-shadow: 0 8px 24px rgba(100, 116, 139, 0.3);
+        transition: all 0.3s ease;
+    }
+    
+    .drop-zone:hover .upload-icon {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 0 12px 36px rgba(100, 116, 139, 0.4);
+    }
+    
+    .upload-text {
+        font-size: 1.2rem;
+        color: #374151;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    .upload-hint {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .file-input {
+        display: none;
+    }
+    
+    .upload-btn {
+        background: linear-gradient(135deg, #64748b, #475569);
+        color: white;
+        border: none;
+        padding: 0.875rem 2rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+    }
+    
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(100, 116, 139, 0.4);
+        background: linear-gradient(135deg, #475569, #334155);
+    }
+    
+    .template-section {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-top: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.5);
+    }
+    
+    .template-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .template-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #059669, #047857);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.3rem;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+    }
+    
+    .template-title {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0;
+    }
+    
+    .template-description {
+        color: #6b7280;
+        margin-bottom: 1.5rem;
+        line-height: 1.6;
+    }
+    
+    .download-btn {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(5, 150, 105, 0.3);
+    }
+    
+    .download-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(5, 150, 105, 0.4);
+        background: linear-gradient(135deg, #047857, #065f46);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .feature-card {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(226, 232, 240, 0.5);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        background: rgba(255, 255, 255, 0.95);
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #64748b, #475569);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 15px rgba(100, 116, 139, 0.2);
+    }
+    
+    .feature-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feature-text {
+        color: #6b7280;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    
+    .selected-file {
+        background: rgba(5, 150, 105, 0.1);
+        border: 2px solid #059669;
+        border-radius: 12px;
+        padding: 1rem;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .file-icon {
+        width: 40px;
+        height: 40px;
+        background: #059669;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    .file-info h6 {
+        margin: 0;
+        color: #059669;
+        font-weight: 600;
+    }
+    
+    .file-info small {
+        color: #6b7280;
+    }
+    
+    .process-btn {
+        background: linear-gradient(135deg, #059669, #047857);
+        color: white;
+        border: none;
+        padding: 1rem 2.5rem;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(5, 150, 105, 0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .process-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(5, 150, 105, 0.5);
+        background: linear-gradient(135deg, #047857, #065f46);
+    }
+    
+    .process-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="batch-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10 col-xl-8">
+                <div class="upload-card">
+                    <div class="upload-header">
+                        <h1 class="upload-title">
+                            <i class="bi bi-file-earmark-spreadsheet me-3"></i>
+                            Bulk Credit Assessment
+                        </h1>
+                        <p class="upload-subtitle">Upload a CSV file to analyze multiple credit applications at once</p>
+                    </div>
+                    
+                    <div class="p-4">
+                        <!-- Flash Messages -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                        <i class="bi bi-{{ 'exclamation-triangle' if category == 'danger' else 'info-circle' }} me-2"></i>
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+                        
+                        <!-- Upload Form -->
+                        <form action="{{ url_for('predict_batch_route') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                            <div class="drop-zone" id="dropZone">
+                                <div class="upload-icon">
+                                    <i class="bi bi-cloud-upload"></i>
+                                </div>
+                                <div class="upload-text">Drag & drop your CSV file here</div>
+                                <div class="upload-hint">or click to browse files</div>
+                                <button type="button" class="upload-btn" onclick="document.getElementById('csvFile').click()">
+                                    <i class="bi bi-folder2-open me-2"></i>
+                                    Choose File
+                                </button>
+                                <input type="file" id="csvFile" name="file" accept=".csv" class="file-input" required>
+                            </div>
+                            
+                            <!-- Selected File Display -->
+                            <div id="selectedFile" class="selected-file" style="display: none;">
+                                <div class="file-icon">
+                                    <i class="bi bi-file-earmark-text"></i>
+                                </div>
+                                <div class="file-info">
+                                    <h6 id="fileName"></h6>
+                                    <small id="fileSize"></small>
+                                </div>
+                            </div>
+                            
+                            <!-- Process Button -->
+                            <div class="text-center mt-4">
+                                <button type="submit" class="process-btn" id="processBtn" disabled>
+                                    <i class="bi bi-gear me-2"></i>
+                                    Process Applications
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Template Download Section -->
+                        <div class="template-section">
+                            <div class="template-header">
+                                <div class="template-icon">
+                                    <i class="bi bi-download"></i>
+                                </div>
+                                <h3 class="template-title">Download Template</h3>
+                            </div>
+                            <p class="template-description">
+                                Download our CSV template to ensure your data is formatted correctly. The template includes all required fields and sample data to guide you.
+                            </p>
+                            <a href="{{ url_for('download_template') }}" class="download-btn">
+                                <i class="bi bi-file-earmark-arrow-down"></i>
+                                Download CSV Template
+                            </a>
+                        </div>
+                        
+                        <!-- Features -->
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="bi bi-lightning"></i>
+                                </div>
+                                <div class="feature-title">Fast Processing</div>
+                                <div class="feature-text">Analyze thousands of applications in seconds with our optimized ML pipeline</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="bi bi-shield-check"></i>
+                                </div>
+                                <div class="feature-title">Accurate Results</div>
+                                <div class="feature-text">Industry-leading accuracy with detailed risk assessment for each application</div>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">
+                                    <i class="bi bi-file-earmark-excel"></i>
+                                </div>
+                                <div class="feature-title">Export Ready</div>
+                                <div class="feature-text">Get results in CSV format ready for further analysis or reporting</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('csvFile');
+    const selectedFile = document.getElementById('selectedFile');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const processBtn = document.getElementById('processBtn');
+    
+    // Drag and drop handlers
+    dropZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+    
+    dropZone.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+    });
+    
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            displaySelectedFile(files[0]);
+        }
+    });
+    
+    // Click handler for drop zone
+    dropZone.addEventListener('click', function() {
+        fileInput.click();
+    });
+    
+    // File input change handler
+    fileInput.addEventListener('change', function() {
+        if (this.files.length > 0) {
+            displaySelectedFile(this.files[0]);
+        }
+    });
+    
+    function displaySelectedFile(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        selectedFile.style.display = 'flex';
+        processBtn.disabled = false;
+    }
+    
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+});
+</script>
+{% endblock %}

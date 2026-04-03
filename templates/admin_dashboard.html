@@ -1,0 +1,378 @@
+{% extends "admin_base.html" %}
+{% block title %}Dashboard — CrediPredict Admin{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.25rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.2s;
+    }
+
+    .stat-card:hover { border-color: rgba(255,255,255,0.15); }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0;
+        width: 80px; height: 80px;
+        border-radius: 50%;
+        opacity: 0.06;
+        transform: translate(20px, -20px);
+    }
+
+    .stat-card.indigo::before { background: #6366f1; }
+    .stat-card.green::before { background: #10b981; }
+    .stat-card.red::before { background: #ef4444; }
+    .stat-card.yellow::before { background: #f59e0b; }
+    .stat-card.blue::before { background: #3b82f6; }
+
+    .stat-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .stat-icon {
+        width: 34px; height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .stat-icon.indigo { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+    .stat-icon.green { background: rgba(16,185,129,0.15); color: #34d399; }
+    .stat-icon.red { background: rgba(239,68,68,0.15); color: #f87171; }
+    .stat-icon.yellow { background: rgba(245,158,11,0.15); color: #fcd34d; }
+    .stat-icon.blue { background: rgba(59,130,246,0.15); color: #93c5fd; }
+
+    .stat-value {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: var(--text);
+        line-height: 1;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+    }
+
+    .stat-today {
+        font-size: 0.72rem;
+        color: #34d399;
+        font-weight: 600;
+        margin-top: 0.25rem;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .charts-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .chart-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 1.5rem;
+    }
+
+    .chart-header {
+        margin-bottom: 1.25rem;
+    }
+
+    .chart-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text);
+    }
+
+    .chart-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
+    }
+
+    .chart-container {
+        position: relative;
+    }
+
+    /* Recent tickets table */
+    .recent-section {
+        margin-top: 1rem;
+    }
+</style>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card indigo">
+        <div class="stat-top">
+            <span class="stat-label">Individual Predictions</span>
+            <span class="stat-icon indigo"><i class="bi bi-person-check"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.total_individual }}</div>
+        <div class="stat-sub">All time</div>
+        <div class="stat-today">+{{ stats.today_individual }} today</div>
+    </div>
+
+    <div class="stat-card blue">
+        <div class="stat-top">
+            <span class="stat-label">Batch Predictions</span>
+            <span class="stat-icon blue"><i class="bi bi-table"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.total_batch }}</div>
+        <div class="stat-sub">Total records processed</div>
+        <div class="stat-today">+{{ stats.today_batch }} today</div>
+    </div>
+
+    <div class="stat-card green">
+        <div class="stat-top">
+            <span class="stat-label">Approved</span>
+            <span class="stat-icon green"><i class="bi bi-check-circle"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.approved_count }}</div>
+        <div class="stat-sub">Individual approvals</div>
+    </div>
+
+    <div class="stat-card red">
+        <div class="stat-top">
+            <span class="stat-label">Rejected</span>
+            <span class="stat-icon red"><i class="bi bi-x-circle"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.rejected_count }}</div>
+        <div class="stat-sub">Individual rejections</div>
+    </div>
+
+    <div class="stat-card yellow">
+        <div class="stat-top">
+            <span class="stat-label">Open Tickets</span>
+            <span class="stat-icon yellow"><i class="bi bi-ticket-perforated"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.open_tickets }}</div>
+        <div class="stat-sub">Awaiting response</div>
+    </div>
+
+    <div class="stat-card green">
+        <div class="stat-top">
+            <span class="stat-label">Resolved Tickets</span>
+            <span class="stat-icon green"><i class="bi bi-check2-all"></i></span>
+        </div>
+        <div class="stat-value">{{ stats.resolved_tickets }}</div>
+        <div class="stat-sub">Out of {{ stats.total_tickets }} total</div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="charts-grid">
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">Predictions Trend</div>
+            <div class="chart-sub">Individual vs Batch — Last 7 days</div>
+        </div>
+        <div class="chart-container" style="height: 220px;">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">Ticket Status</div>
+            <div class="chart-sub">Current breakdown</div>
+        </div>
+        <div class="chart-container" style="height: 220px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="ticketChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="charts-bottom">
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">Individual Decisions</div>
+            <div class="chart-sub">Approved vs Rejected distribution</div>
+        </div>
+        <div class="chart-container" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="indDecisionChart"></canvas>
+        </div>
+    </div>
+
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-title">Batch Decisions</div>
+            <div class="chart-sub">Approved vs Rejected distribution</div>
+        </div>
+        <div class="chart-container" style="height: 200px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="batchDecisionChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+Chart.defaults.color = 'rgba(255,255,255,0.4)';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+async function loadCharts() {
+    try {
+        const res = await fetch('/xK9mP2-dashboard/api/chart-data');
+        const data = await res.json();
+        if (data.error) return;
+
+        // Trend Chart
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: data.predictions_trend.labels.map(d => {
+                    const dt = new Date(d);
+                    return dt.toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+                }),
+                datasets: [
+                    {
+                        label: 'Individual',
+                        data: data.predictions_trend.individual,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99,102,241,0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366f1',
+                        pointRadius: 4
+                    },
+                    {
+                        label: 'Batch',
+                        data: data.predictions_trend.batch,
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16,185,129,0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#10b981',
+                        pointRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { boxWidth: 12, font: { size: 11 } } } },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 10 } } },
+                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Ticket Donut
+        const ts = data.ticket_status;
+        new Chart(document.getElementById('ticketChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Open', 'In Progress', 'Resolved'],
+                datasets: [{
+                    data: [ts.open, ts.in_progress, ts.resolved],
+                    backgroundColor: ['rgba(99,102,241,0.8)', 'rgba(245,158,11,0.8)', 'rgba(16,185,129,0.8)'],
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 }, padding: 12 } }
+                }
+            }
+        });
+
+        // Individual Decision Bar
+        const id = data.individual_decisions;
+        new Chart(document.getElementById('indDecisionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Approved', 'Rejected', 'Review'],
+                datasets: [{
+                    data: [id.approved, id.rejected, id.review],
+                    backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)', 'rgba(245,158,11,0.7)'],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true }
+                }
+            }
+        });
+
+        // Batch Decision Bar
+        const bd = data.batch_decisions;
+        new Chart(document.getElementById('batchDecisionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Approved', 'Rejected', 'Review'],
+                datasets: [{
+                    data: [bd.approved, bd.rejected, bd.review],
+                    backgroundColor: ['rgba(16,185,129,0.7)', 'rgba(239,68,68,0.7)', 'rgba(245,158,11,0.7)'],
+                    borderRadius: 6,
+                    borderSkipped: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                    y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { font: { size: 10 }, stepSize: 1 }, beginAtZero: true }
+                }
+            }
+        });
+
+    } catch(e) {
+        console.error('Chart load error:', e);
+    }
+}
+
+loadCharts();
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{
+  "name": "CrediPredict Credit Assessment",
+  "description": "AI-powered credit assessment application with detailed feedback and suggestions",
+  "repository": "https://github.com/yourusername/credit-card-approval-app",
+  "logo": "https://cdn-icons-png.flaticon.com/512/2830/2830284.png",
+  "keywords": ["python", "flask", "machine-learning", "credit-assessment", "ai"],
+  "image": "heroku/python",
+  "stack": "heroku-22",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "FLASK_ENV": {
+      "description": "Flask environment",
+      "value": "production"
+    },
+    "SECRET_KEY": {
+      "description": "Secret key for Flask sessions",
+      "generator": "secret"
+    },
+    "HF_API_TOKEN": {
+      "description": "Hugging Face API token (optional for enhanced AI feedback)",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "addons": []
+}

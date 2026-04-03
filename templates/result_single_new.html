@@ -1,0 +1,281 @@
+{% extends "base.html" %}
+
+{% block title %}Application Result{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 100px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="h2 fw-bold mb-3">
+                    Application Result
+                </h1>
+                <p class="lead text-muted">Here's what we found after reviewing your application</p>
+            </div>
+
+            <!-- Main Result Card -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-5 text-center">
+                    <!-- Result Icon & Status -->
+                    <div class="mb-4">
+                        {% if result.risk_level in ['VERY LOW', 'LOW'] %}
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" 
+                                 style="width: 80px; height: 80px; background: linear-gradient(135deg, var(--accent-color), #34d399);">
+                                <i class="bi bi-check-circle text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                        {% elif result.risk_level == 'MEDIUM' %}
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" 
+                                 style="width: 80px; height: 80px; background: linear-gradient(135deg, #f59e0b, #f97316);">
+                                <i class="bi bi-exclamation-triangle text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                        {% else %}
+                            <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" 
+                                 style="width: 80px; height: 80px; background: linear-gradient(135deg, #ef4444, #dc2626);">
+                                <i class="bi bi-x-circle text-white" style="font-size: 2.5rem;"></i>
+                            </div>
+                        {% endif %}
+                        
+                        <h2 class="h3 fw-bold mb-2">{{ result.recommendation.decision }}</h2>
+                        <p class="text-muted mb-0">{{ result.recommendation.reason }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What This Means -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <h4 class="h5 fw-bold mb-3">
+                        <i class="bi bi-lightbulb text-primary me-2"></i>
+                        What This Means for You
+                    </h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded mb-3">
+                                <h6 class="fw-bold text-primary mb-2">Your Financial Assessment</h6>
+                                <p class="mb-0 small">
+                                    {% if result.risk_level == 'VERY LOW' %}
+                                        You have an excellent financial profile with strong creditworthiness.
+                                    {% elif result.risk_level == 'LOW' %}
+                                        You have a good financial profile that meets our standards.
+                                    {% elif result.risk_level == 'MEDIUM' %}
+                                        Your financial profile shows some areas for improvement.
+                                    {% elif result.risk_level == 'HIGH' %}
+                                        Your application needs additional consideration.
+                                    {% else %}
+                                        We need to review your application more carefully.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="fw-bold text-primary mb-2">Next Steps</h6>
+                                <p class="mb-0 small">
+                                    {% if result.recommendation.decision == 'APPROVED' %}
+                                        Congratulations! You can expect to receive your card details soon.
+                                    {% else %}
+                                        Don't worry - we've provided recommendations to help improve your profile.
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                                    {% endif %}
+                                </h3>
+                                <p class="text-muted mb-0">Your Financial Assessment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- What This Means for You -->
+            <div class="row">
+                <div class="col-lg-12 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>What This Means for You</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for recommendation in result.detailed_analysis.recommendations %}
+                            <div class="alert alert-light border-start border-primary border-3 mb-3">
+                                <p class="mb-0 h6">{{ recommendation }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- What Worked in Your Favor -->
+                {% if result.detailed_analysis.positive_factors %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-thumbs-up me-2"></i>What Worked in Your Favor</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for factor in result.detailed_analysis.positive_factors %}
+                            <div class="d-flex align-items-start mb-3 p-3 bg-light rounded">
+                                <span class="me-3 text-success" style="font-size: 1.8rem;">{{ factor.icon }}</span>
+                                <div>
+                                    <h6 class="text-success mb-1">{{ factor.factor }}</h6>
+                                    <p class="mb-0 text-dark">{{ factor.description }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Areas for Improvement -->
+                {% if result.detailed_analysis.risk_factors %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Areas for Improvement</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for factor in result.detailed_analysis.risk_factors %}
+                            <div class="d-flex align-items-start mb-3 p-3 bg-light rounded">
+                                <span class="me-3 text-warning" style="font-size: 1.8rem;">{{ factor.icon }}</span>
+                                <div>
+                                    <h6 class="text-warning mb-1">{{ factor.factor }}</h6>
+                                    <p class="mb-0 text-dark">{{ factor.description }}</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Next Steps / Your Action Plan -->
+                {% if result.detailed_analysis.improvement_tips %}
+                <div class="col-lg-12 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-header text-white" style="background: linear-gradient(45deg, #6f42c1, #007bff);">
+                            <h5 class="mb-0">
+                                <i class="fas fa-road me-2"></i>
+                                {% if result.recommendation.decision == 'REJECTED' %}
+                                    Your Path to Approval
+                                {% elif result.recommendation.decision == 'MANUAL REVIEW' %}
+                                    What We Need from You
+                                {% else %}
+                                    Your Next Steps
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% for tip in result.detailed_analysis.improvement_tips %}
+                            <div class="d-flex align-items-start mb-3">
+                                <span class="me-3 text-primary" style="font-size: 1.2rem;">
+                                    {% if loop.index <= 3 %}
+                                        <i class="fas fa-arrow-right"></i>
+                                    {% else %}
+                                        <i class="fas fa-star"></i>
+                                    {% endif %}
+                                </span>
+                                <p class="mb-0 h6">{{ tip }}</p>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Your Application Details -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-user-circle text-primary me-2"></i>Your Application Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <span class="text-muted">Age:</span>
+                                <strong class="ms-2">{{ input_data.AGE_YEARS }} years old</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Annual Income:</span>
+                                <strong class="ms-2">${{ "{:,.0f}".format(input_data.AMT_INCOME_TOTAL) }}</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Work Experience:</span>
+                                <strong class="ms-2">{{ input_data.EMPLOYED_YEARS }} years</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Family Size:</span>
+                                <strong class="ms-2">{{ input_data.CNT_CHILDREN }} children, {{ input_data.CNT_FAM_MEMBERS }} total family members</strong>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <span class="text-muted">Education:</span>
+                                <strong class="ms-2">{{ input_data.NAME_EDUCATION_TYPE }}</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Relationship Status:</span>
+                                <strong class="ms-2">{{ input_data.NAME_FAMILY_STATUS }}</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Living Situation:</span>
+                                <strong class="ms-2">{{ input_data.NAME_HOUSING_TYPE }}</strong>
+                            </div>
+                            <div class="mb-3">
+                                <span class="text-muted">Occupation:</span>
+                                <strong class="ms-2">{{ input_data.OCCUPATION_TYPE }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information Box -->
+            {% if result.recommendation.decision == 'MANUAL REVIEW' %}
+            <div class="alert alert-info border-0 shadow mb-4">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <i class="fas fa-phone-alt fa-2x text-info"></i>
+                    </div>
+                    <div class="col">
+                        <h6 class="alert-heading mb-1">Need Help?</h6>
+                        <p class="mb-0">Our credit specialists are here to help you complete your application. Call us at <strong>1-800-CREDIT-1</strong> or visit any branch.</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="text-center">
+                {% if result.recommendation.decision == 'APPROVED' %}
+                    <a href="#" class="btn btn-success btn-lg me-3 px-5">
+                        <i class="fas fa-credit-card me-2"></i>Activate Your Card
+                    </a>
+                {% elif result.recommendation.decision == 'MANUAL REVIEW' %}
+                    <a href="#" class="btn btn-primary btn-lg me-3 px-5">
+                        <i class="fas fa-upload me-2"></i>Upload Documents
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('single_prediction') }}" class="btn btn-primary btn-lg me-3 px-5">
+                        <i class="fas fa-redo me-2"></i>Apply Again
+                    </a>
+                {% endif %}
+                
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg px-4">
+                    <i class="fas fa-home me-2"></i>Back to Home
+                </a>
+            </div>
+
+            <!-- Footer Message -->
+            <div class="text-center mt-5 text-muted">
+                <p><i class="fas fa-shield-alt me-2"></i>Your information is secure and protected with bank-level encryption</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

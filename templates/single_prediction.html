@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for Credit Card{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="margin-top: 100px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <h1 class="h2 fw-bold mb-3">
+                    <i class="bi bi-credit-card text-primary me-3"></i>
+                    Credit Card Application
+                </h1>
+                <p class="lead text-muted mb-4">
+                    Complete your application in just 3 minutes and get an instant decision.
+                </p>
+                
+                <!-- Progress Indicator -->
+                <div class="row justify-content-center mb-4">
+                    <div class="col-md-8">
+                        <div class="progress mb-2" style="height: 6px;">
+                            <div class="progress-bar" role="progressbar" style="width: 0%" id="progress-bar"></div>
+                        </div>
+                        <small class="text-muted">Step <span id="current-step">1</span> of 4</small>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- Application Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <form method="POST" action="{{ url_for('predict_single_route') }}" id="application-form">
+                        <!-- Step 1: Basic Information -->
+                        <div class="step-section" id="step-1">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="step-indicator me-3">1</div>
+                                <div>
+                                    <h4 class="h5 fw-bold mb-1">Basic Information</h4>
+                                    <p class="text-muted mb-0">Tell us about yourself</p>
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="gender" name="gender" required>
+                                            <option value="">Select...</option>
+                                            <option value="M">Male</option>
+                                            <option value="F">Female</option>
+                                        </select>
+                                        <label for="gender">Gender</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="number" class="form-control" id="age" name="age" 
+                                               placeholder="Age" min="18" max="80" required>
+                                        <label for="age">Age</label>
+                                    </div>
+                                    <small class="text-muted">Must be 18 or older</small>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                    Next <i class="bi bi-arrow-right ms-1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 2: Income & Employment -->
+                        <div class="step-section" id="step-2" style="display: none;">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="step-indicator me-3" style="background: var(--accent-color);">2</div>
+                                <div>
+                                    <h4 class="h5 fw-bold mb-1">Income & Employment</h4>
+                                    <p class="text-muted mb-0">Your work and earnings</p>
+                                </div>
+                            </div>
+
+                            <div class="row g-3">
+                                <label for="income" class="form-label">Annual Income</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="income" name="income" 
+                                           placeholder="50000" min="0" required>
+                                </div>
+                                <div class="form-text">Your total yearly income before taxes</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="employment_years" class="form-label">Years Working</label>
+                                <input type="number" class="form-control form-control-lg" id="employment_years" 
+                                       name="employment_years" placeholder="5" min="0" max="50" required>
+                                <div class="form-text">How long have you been working?</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="income_type" class="form-label">Income Source</label>
+                                <select class="form-select form-select-lg" id="income_type" name="income_type" required>
+                                    <option value="">Choose your income source...</option>
+                                    <option value="Working">Employee (Regular Job)</option>
+                                    <option value="Commercial associate">Business Owner</option>
+                                    <option value="Pensioner">Retired/Pension</option>
+                                    <option value="State servant">Government Employee</option>
+                                    <option value="Student">Student</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="occupation" class="form-label">Your Job</label>
+                                <select class="form-select form-select-lg" id="occupation" name="occupation" required>
+                                    <option value="">Select your occupation...</option>
+                                    <option value="Managers">Manager/Executive</option>
+                                    <option value="High skill tech staff">Engineer/IT Professional</option>
+                                    <option value="Core staff">Office Worker</option>
+                                    <option value="Accountants">Accountant/Finance</option>
+                                    <option value="Medicine staff">Healthcare Worker</option>
+                                    <option value="Sales staff">Sales Representative</option>
+                                    <option value="Laborers">Manual Worker</option>
+                                    <option value="Drivers">Driver</option>
+                                    <option value="Security staff">Security Guard</option>
+                                    <option value="Cooking staff">Chef/Kitchen Staff</option>
+                                    <option value="Cleaning staff">Cleaning Staff</option>
+                                    <option value="Private service staff">Service Worker</option>
+                                    <option value="Low-skill Laborers">Entry Level Worker</option>
+                                    <option value="Waiters/barmen staff">Restaurant Staff</option>
+                                    <option value="Secretaries">Secretary/Admin</option>
+                                    <option value="Realty agents">Real Estate Agent</option>
+                                    <option value="HR staff">Human Resources</option>
+                                    <option value="IT staff">IT Support</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Family & Living Situation -->
+                        <div class="row mb-4">
+                            <div class="col-12 mb-3">
+                                <div class="d-flex align-items-center mb-3">
+                                    <span class="badge bg-primary rounded-pill me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">3</span>
+                                    <h5 class="mb-0 text-primary">Family & Living</h5>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="family_status" class="form-label">Relationship Status</label>
+                                <select class="form-select form-select-lg" id="family_status" name="family_status" required>
+                                    <option value="">Select your status...</option>
+                                    <option value="Single / not married">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Civil marriage">Living Together</option>
+                                    <option value="Separated">Separated</option>
+                                    <option value="Widow">Widowed</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="children" class="form-label">Number of Children</label>
+                                <input type="number" class="form-control form-control-lg" id="children" 
+                                       name="children" placeholder="0" min="0" max="10" required>
+                                <div class="form-text">How many children do you have?</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="family_members" class="form-label">Total Family Size</label>
+                                <input type="number" class="form-control form-control-lg" id="family_members" 
+                                       name="family_members" placeholder="2" min="1" max="15" required>
+                                <div class="form-text">Including yourself and spouse</div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="education" class="form-label">Education Level</label>
+                                <select class="form-select form-select-lg" id="education" name="education" required>
+                                    <option value="">Select your education...</option>
+                                    <option value="Higher education">College/University Degree</option>
+                                    <option value="Secondary / secondary special">High School</option>
+                                    <option value="Incomplete higher">Some College</option>
+                                    <option value="Lower secondary">Middle School</option>
+                                    <option value="Academic degree">Master's/PhD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Assets & Housing -->
+                        <div class="row mb-4">
+                            <div class="col-12 mb-3">
+                                <div class="d-flex align-items-center mb-3">
+                                    <span class="badge bg-primary rounded-pill me-3" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">4</span>
+                                    <h5 class="mb-0 text-primary">Your Assets</h5>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Do you own a car?</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="own_car" id="car_yes" value="Y" required>
+                                        <label class="form-check-label" for="car_yes">
+                                            <i class="fas fa-car text-success me-2"></i>Yes
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="own_car" id="car_no" value="N" required>
+                                        <label class="form-check-label" for="car_no">
+                                            <i class="fas fa-times text-danger me-2"></i>No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Do you own property?</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="own_realty" id="realty_yes" value="Y" required>
+                                        <label class="form-check-label" for="realty_yes">
+                                            <i class="fas fa-home text-success me-2"></i>Yes
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="own_realty" id="realty_no" value="N" required>
+                                        <label class="form-check-label" for="realty_no">
+                                            <i class="fas fa-times text-danger me-2"></i>No
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                <label for="housing" class="form-label">Where do you live?</label>
+                                <select class="form-select form-select-lg" id="housing" name="housing" required>
+                                    <option value="">Select your living situation...</option>
+                                    <option value="House / apartment">Own House/Apartment</option>
+                                    <option value="Rented apartment">Rented Apartment</option>
+                                    <option value="With parents">Living with Parents</option>
+                                    <option value="Municipal apartment">Government Housing</option>
+                                    <option value="Office apartment">Company Housing</option>
+                                    <option value="Co-op apartment">Cooperative Housing</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Privacy Notice -->
+                        <div class="alert alert-light border mb-4">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-shield-alt text-primary me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="alert-heading">Your Privacy Matters</h6>
+                                    <p class="mb-0 small">All information is encrypted and securely processed. We never share your personal data with third parties.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg py-3">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Get My Credit Decision
+                            </button>
+                            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="text-center mt-4">
+                <p class="text-muted">
+                    <i class="fas fa-question-circle me-2"></i>
+                    Need help? Call us at <strong>1-800-CREDIT-1</strong> or 
+                    <a href="#">chat with our support team</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="age" name="age" 
+                                           placeholder="Age" min="18" max="100" required>
+                                    <label for="age">Age (years)</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="family_status" name="family_status" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Single / not married">Single / Not married</option>
+                                        <option value="Married">Married</option>
+                                        <option value="Civil marriage">Civil marriage</option>
+                                        <option value="Separated">Separated</option>
+                                        <option value="Widow">Widow</option>
+                                    </select>
+                                    <label for="family_status">Family Status</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="children" name="children" 
+                                           placeholder="Children" min="0" max="20" value="0">
+                                    <label for="children">Number of Children</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="family_members" name="family_members" 
+                                           placeholder="Family Members" min="1" max="20" required value="1">
+                                    <label for="family_members">Family Members Count</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Education & Employment -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-graduation-cap me-2"></i>
+                                    Education & Employment
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="education" name="education" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Secondary / secondary special">Secondary / Secondary special</option>
+                                        <option value="Higher education">Higher education</option>
+                                        <option value="Incomplete higher">Incomplete higher</option>
+                                        <option value="Lower secondary">Lower secondary</option>
+                                        <option value="Academic degree">Academic degree</option>
+                                    </select>
+                                    <label for="education">Education Level</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="occupation" name="occupation" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Laborers">Laborers</option>
+                                        <option value="Core staff">Core staff</option>
+                                        <option value="Accountants">Accountants</option>
+                                        <option value="Managers">Managers</option>
+                                        <option value="Drivers">Drivers</option>
+                                        <option value="Sales staff">Sales staff</option>
+                                        <option value="Cleaning staff">Cleaning staff</option>
+                                        <option value="Cooking staff">Cooking staff</option>
+                                        <option value="Private service staff">Private service staff</option>
+                                        <option value="Medicine staff">Medicine staff</option>
+                                        <option value="Security staff">Security staff</option>
+                                        <option value="High skill tech staff">High skill tech staff</option>
+                                        <option value="IT staff">IT staff</option>
+                                        <option value="HR staff">HR staff</option>
+                                        <option value="Realty agents">Realty agents</option>
+                                        <option value="Secretaries">Secretaries</option>
+                                        <option value="Waiters/barmen staff">Waiters/barmen staff</option>
+                                        <option value="Low-skill Laborers">Low-skill Laborers</option>
+                                    </select>
+                                    <label for="occupation">Occupation</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="employment_years" name="employment_years" 
+                                           placeholder="Employment Years" min="0" max="50" required>
+                                    <label for="employment_years">Years of Employment</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Financial Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-dollar-sign me-2"></i>
+                                    Financial Information
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="number" class="form-control" id="income" name="income" 
+                                           placeholder="Annual Income" min="0" step="1000" required>
+                                    <label for="income">Annual Income ($)</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="income_type" name="income_type" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Working">Working</option>
+                                        <option value="Commercial associate">Commercial associate</option>
+                                        <option value="Pensioner">Pensioner</option>
+                                        <option value="State servant">State servant</option>
+                                        <option value="Student">Student</option>
+                                        <option value="Businessman">Businessman</option>
+                                        <option value="Maternity leave">Maternity leave</option>
+                                        <option value="Unemployed">Unemployed</option>
+                                    </select>
+                                    <label for="income_type">Income Type</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Assets Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-home me-2"></i>
+                                    Assets & Housing
+                                </h5>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="own_car" name="own_car" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Y">Yes</option>
+                                        <option value="N">No</option>
+                                    </select>
+                                    <label for="own_car">Own Car?</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="own_realty" name="own_realty" required>
+                                        <option value="">Choose...</option>
+                                        <option value="Y">Yes</option>
+                                        <option value="N">No</option>
+                                    </select>
+                                    <label for="own_realty">Own Real Estate?</label>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <div class="form-floating">
+                                    <select class="form-select" id="housing" name="housing" required>
+                                        <option value="">Choose...</option>
+                                        <option value="House / apartment">House / apartment</option>
+                                        <option value="With parents">With parents</option>
+                                        <option value="Municipal apartment">Municipal apartment</option>
+                                        <option value="Rented apartment">Rented apartment</option>
+                                        <option value="Office apartment">Office apartment</option>
+                                        <option value="Co-op apartment">Co-op apartment</option>
+                                    </select>
+                                    <label for="housing">Housing Type</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 btn-custom">
+                                <i class="fas fa-calculator me-2"></i>
+                                Calculate Risk & Get Decision
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="card mt-4 bg-light border-0">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">
+                        <i class="fas fa-info-circle me-2"></i>
+                        How it works
+                    </h6>
+                    <p class="text-muted mb-0">
+                        Our AI model analyzes your information using ensemble machine learning algorithms 
+                        with a conservative threshold of 0.90 to minimize credit risk while ensuring fair decisions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Add some client-side validation and UX improvements
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate family members based on children + 1
+    const childrenInput = document.getElementById('children');
+    const familyMembersInput = document.getElementById('family_members');
+    
+    childrenInput.addEventListener('input', function() {
+        const children = parseInt(this.value) || 0;
+        const currentFamilyMembers = parseInt(familyMembersInput.value) || 1;
+        
+        // Suggest family members = children + adults (minimum 1)
+        if (children > 0) {
+            familyMembersInput.value = Math.max(children + 1, currentFamilyMembers);
+        }
+    });
+    
+    // Format income input
+    const incomeInput = document.getElementById('income');
+    incomeInput.addEventListener('input', function() {
+        // Remove non-digits except decimal point
+        this.value = this.value.replace(/[^\d.]/g, '');
+    });
+});
+</script>
+{% endblock %}

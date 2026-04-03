@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}Credit Approval Result{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="fas fa-chart-line text-primary me-3"></i>
+                    Credit Approval Result
+                </h1>
+            </div>
+
+            <!-- Main Result Card -->
+            <div class="card shadow-lg border-0 mb-4">
+                <div class="card-header bg-{{ result.recommendation.color }} text-white">
+                    <div class="row align-items-center">
+                        <div class="col-auto">
+                            <span style="font-size: 2rem;">{{ result.recommendation.icon }}</span>
+                        </div>
+                        <div class="col">
+                            <h3 class="mb-1">{{ result.recommendation.decision }}</h3>
+                            <p class="mb-0">{{ result.recommendation.reason }}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card-body p-4">
+                    <!-- Risk Assessment -->
+                    <div class="row text-center mb-4">
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <div class="text-{{ result.risk_color }} mb-2">
+                                    <span style="font-size: 3rem;">{{ result.risk_icon }}</span>
+                                </div>
+                                <h4 class="text-{{ result.risk_color }}">{{ result.risk_level }}</h4>
+                                <small class="text-muted">Risk Level</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h2 class="text-primary mb-2">{{ result.risk_probability }}%</h2>
+                                <small class="text-muted">Default Risk Probability</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3">
+                                <h2 class="text-info mb-2">{{ result.confidence }}%</h2>
+                                <small class="text-muted">Confidence Level</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analysis Section -->
+            {% if result.detailed_analysis %}
+            <div class="row">
+                <!-- Decision Explanation -->
+                <div class="col-lg-12 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0"><i class="fas fa-info-circle text-primary me-2"></i>Decision Explanation</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for recommendation in result.detailed_analysis.recommendations %}
+                            <p class="mb-2"><strong>{{ recommendation }}</strong></p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Factors -->
+                {% if result.detailed_analysis.risk_factors %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow h-100">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Risk Factors</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for factor in result.detailed_analysis.risk_factors %}
+                            <div class="alert alert-light border-start border-danger border-3 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <span class="me-3" style="font-size: 1.5rem;">{{ factor.icon }}</span>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">{{ factor.factor }}</h6>
+                                        <p class="mb-1">{{ factor.description }}</p>
+                                        <small class="text-muted">Impact: <strong>{{ factor.impact }}</strong></small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Positive Factors -->
+                {% if result.detailed_analysis.positive_factors %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card border-0 shadow h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Positive Factors</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for factor in result.detailed_analysis.positive_factors %}
+                            <div class="alert alert-light border-start border-success border-3 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <span class="me-3" style="font-size: 1.5rem;">{{ factor.icon }}</span>
+                                    <div>
+                                        <h6 class="alert-heading mb-1">{{ factor.factor }}</h6>
+                                        <p class="mb-1">{{ factor.description }}</p>
+                                        <small class="text-muted">Impact: <strong>{{ factor.impact }}</strong></small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Improvement Tips / Next Steps -->
+                {% if result.detailed_analysis.improvement_tips %}
+                <div class="col-lg-12 mb-4">
+                    <div class="card border-0 shadow">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                {% if result.recommendation.decision == 'REJECTED' %}
+                                    How to Improve for Future Applications
+                                {% elif result.recommendation.decision == 'MANUAL REVIEW' %}
+                                    Required Documentation
+                                {% else %}
+                                    Next Steps & Benefits
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                {% for tip in result.detailed_analysis.improvement_tips %}
+                                <li class="mb-2">{{ tip }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Application Details Summary -->
+            <div class="card border-0 shadow mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="fas fa-user text-primary me-2"></i>Application Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Age:</strong> {{ input_data.AGE_YEARS }} years</p>
+                            <p><strong>Income:</strong> ${{ "{:,.0f}".format(input_data.AMT_INCOME_TOTAL) }}</p>
+                            <p><strong>Employment:</strong> {{ input_data.EMPLOYED_YEARS }} years</p>
+                            <p><strong>Children:</strong> {{ input_data.CNT_CHILDREN }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Education:</strong> {{ input_data.NAME_EDUCATION_TYPE }}</p>
+                            <p><strong>Family Status:</strong> {{ input_data.NAME_FAMILY_STATUS }}</p>
+                            <p><strong>Housing:</strong> {{ input_data.NAME_HOUSING_TYPE }}</p>
+                            <p><strong>Occupation:</strong> {{ input_data.OCCUPATION_TYPE }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center">
+                <a href="{{ url_for('single_prediction') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-plus me-2"></i>New Application
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-home me-2"></i>Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+                                <h2 class="text-info mb-2">{{ result.confidence }}%</h2>
+                                <small class="text-muted">Model Confidence</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Risk Progress Bar -->
+                    <div class="mb-4">
+                        <label class="form-label"><strong>Risk Assessment Scale</strong></label>
+                        <div class="position-relative">
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-success" style="width: 20%">Very Low</div>
+                                <div class="progress-bar bg-info" style="width: 20%">Low</div>
+                                <div class="progress-bar bg-warning" style="width: 20%">Medium</div>
+                                <div class="progress-bar bg-orange" style="width: 20%">High</div>
+                                <div class="progress-bar bg-danger" style="width: 20%">Very High</div>
+                            </div>
+                            <!-- Risk indicator marker -->
+                            <div class="position-absolute top-0" 
+                                 style="left: {{ result.risk_probability }}%; transform: translateX(-50%);">
+                                <div class="bg-dark text-white px-2 py-1 rounded" style="font-size: 0.8rem;">
+                                    {{ result.risk_probability }}%
+                                </div>
+                                <div class="w-0 h-0 mx-auto" style="
+                                    border-left: 5px solid transparent;
+                                    border-right: 5px solid transparent;
+                                    border-top: 5px solid black;
+                                "></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Business Recommendation -->
+                    <div class="alert alert-{{ result.recommendation.color }} border-0" role="alert">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Business Recommendation
+                        </h5>
+                        {% if result.recommendation.decision == 'APPROVED' %}
+                            {% if result.risk_probability < 40 %}
+                                <p><strong>Standard Approval:</strong> Low risk profile suitable for standard credit terms.</p>
+                                <ul class="mb-0">
+                                    <li>Standard interest rates apply</li>
+                                    <li>Regular monitoring schedule</li>
+                                    <li>Full credit limit approved</li>
+                                </ul>
+                            {% else %}
+                                <p><strong>Conditional Approval:</strong> Medium risk requires enhanced monitoring.</p>
+                                <ul class="mb-0">
+                                    <li>Consider reduced credit limit initially</li>
+                                    <li>Monthly account review recommended</li>
+                                    <li>Slightly higher interest rate may apply</li>
+                                </ul>
+                            {% endif %}
+                        {% elif result.recommendation.decision == 'MANUAL REVIEW' %}
+                            <p><strong>Manual Review Required:</strong> Application needs human assessment.</p>
+                            <ul class="mb-0">
+                                <li>Request additional documentation</li>
+                                <li>Verify income and employment</li>
+                                <li>Consider co-signer or collateral</li>
+                                <li>Escalate to senior underwriter</li>
+                            </ul>
+                        {% else %}
+                            <p><strong>❌ Rejection Recommended:</strong> High default risk detected.</p>
+                            <ul class="mb-0">
+                                <li>Risk probability above threshold (90%)</li>
+                                <li>Consider alternative products</li>
+                                <li>Recommend financial counseling</li>
+                                <li>Review again in 6-12 months</li>
+                            </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Details -->
+            <div class="card shadow border-0 mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Application Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Personal Information</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Gender:</strong></td><td>{{ 'Male' if input_data.CODE_GENDER == 'M' else 'Female' }}</td></tr>
+                                <tr><td><strong>Age:</strong></td><td>{{ input_data.AGE_YEARS }} years</td></tr>
+                                <tr><td><strong>Family Status:</strong></td><td>{{ input_data.NAME_FAMILY_STATUS }}</td></tr>
+                                <tr><td><strong>Children:</strong></td><td>{{ input_data.CNT_CHILDREN }}</td></tr>
+                                <tr><td><strong>Family Members:</strong></td><td>{{ input_data.CNT_FAM_MEMBERS }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Financial Information</h6>
+                            <table class="table table-sm">
+                                <tr><td><strong>Annual Income:</strong></td><td>${{ "{:,.0f}".format(input_data.AMT_INCOME_TOTAL) }}</td></tr>
+                                <tr><td><strong>Income Type:</strong></td><td>{{ input_data.NAME_INCOME_TYPE }}</td></tr>
+                                <tr><td><strong>Education:</strong></td><td>{{ input_data.NAME_EDUCATION_TYPE }}</td></tr>
+                                <tr><td><strong>Occupation:</strong></td><td>{{ input_data.OCCUPATION_TYPE }}</td></tr>
+                                <tr><td><strong>Employment Years:</strong></td><td>{{ input_data.EMPLOYED_YEARS }}</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-12 mt-3">
+                            <h6 class="text-primary">Assets</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span class="badge bg-{{ 'success' if input_data.FLAG_OWN_CAR == 'Y' else 'secondary' }} me-2">
+                                        {{ '🚗 Owns Car' if input_data.FLAG_OWN_CAR == 'Y' else '🚫 No Car' }}
+                                    </span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-{{ 'success' if input_data.FLAG_OWN_REALTY == 'Y' else 'secondary' }} me-2">
+                                        {{ '🏠 Owns Real Estate' if input_data.FLAG_OWN_REALTY == 'Y' else '🚫 No Real Estate' }}
+                                    </span>
+                                </div>
+                                <div class="col-md-4">
+                                    <span class="badge bg-info">🏡 {{ input_data.NAME_HOUSING_TYPE }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Model Information -->
+            <div class="card border-0 bg-light">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2">
+                        <i class="fas fa-robot me-2"></i>
+                        Model Information
+                    </h6>
+                    <p class="text-muted mb-0 small">
+                        Decision made using ensemble machine learning model with conservative threshold (0.90) 
+                        designed to minimize credit risk. Model confidence: {{ result.confidence }}%
+                    </p>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-4">
+                <a href="{{ url_for('single_prediction') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-plus me-2"></i>
+                    New Application
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-home me-2"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.bg-orange {
+    background-color: #fd7e14 !important;
+}
+</style>
+{% endblock %}

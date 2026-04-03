@@ -1,0 +1,1460 @@
+{% extends "base.html" %}
+
+{% block title %}Help Desk - CrediPredict{% endblock %}
+
+{% block content %}
+<style>
+    /* ── Page Layout ─────────────────────────────────────────── */
+    .helpdesk-wrapper {
+        min-height: 100vh;
+        padding: 5rem 0 2rem;
+        background: linear-gradient(160deg, #f0f4ff 0%, #fafbfc 50%, #f0fdf4 100%);
+    }
+
+    .helpdesk-header {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .helpdesk-header h1 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #4f46e5, #10b981);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.25rem;
+    }
+
+    .helpdesk-header p {
+        color: #6b7280;
+        font-size: 1.1rem;
+    }
+
+    /* ── Tabs ─────────────────────────────────────────────────── */
+    .hd-tabs {
+        display: flex;
+        gap: 0.5rem;
+        background: white;
+        border-radius: 16px;
+        padding: 0.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+        margin-bottom: 2rem;
+        border: 1px solid #e5e7eb;
+    }
+
+    .hd-tab {
+        flex: 1;
+        padding: 0.875rem 1rem;
+        border: none;
+        border-radius: 12px;
+        background: transparent;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .hd-tab:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .hd-tab.active {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .hd-tab-content {
+        display: none;
+    }
+
+    .hd-tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Card Base ────────────────────────────────────────────── */
+    .hd-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid #e5e7eb;
+    }
+
+    /* ── FAQ ──────────────────────────────────────────────────── */
+    .faq-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+        overflow: hidden;
+        transition: box-shadow 0.2s ease;
+    }
+
+    .faq-item:hover {
+        box-shadow: 0 4px 15px rgba(0,0,0,0.07);
+    }
+
+    .faq-question {
+        width: 100%;
+        padding: 1.1rem 1.5rem;
+        background: #f9fafb;
+        border: none;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        color: #1f2937;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        transition: background 0.2s ease;
+    }
+
+    .faq-question:hover {
+        background: #f0f0ff;
+    }
+
+    .faq-question.open {
+        background: linear-gradient(135deg, #ede9fe, #dbeafe);
+        color: #4f46e5;
+    }
+
+    .faq-icon {
+        font-size: 1.1rem;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+    }
+
+    .faq-question.open .faq-icon {
+        transform: rotate(45deg);
+    }
+
+    .faq-answer {
+        display: none;
+        padding: 1rem 1.5rem 1.25rem;
+        color: #4b5563;
+        line-height: 1.7;
+        font-size: 0.93rem;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .faq-answer.open {
+        display: block;
+    }
+
+    /* ── Chatbot ──────────────────────────────────────────────── */
+    .chat-window {
+        height: 380px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.25rem;
+        background: #f9fafb;
+        margin-bottom: 1rem;
+        scroll-behavior: smooth;
+    }
+
+    .chat-window::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .chat-window::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    .chat-window::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 3px;
+    }
+
+    .chat-msg {
+        display: flex;
+        margin-bottom: 1rem;
+        gap: 0.6rem;
+        align-items: flex-end;
+    }
+
+    .chat-msg.user {
+        flex-direction: row-reverse;
+    }
+
+    .chat-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .chat-avatar.bot {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+    }
+
+    .chat-avatar.user-av {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+    }
+
+    .chat-bubble {
+        max-width: 75%;
+        padding: 0.75rem 1rem;
+        border-radius: 16px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .chat-msg.bot .chat-bubble {
+        background: white;
+        color: #1f2937;
+        border: 1px solid #e5e7eb;
+        border-bottom-left-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .chat-msg.user .chat-bubble {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .chat-input-row {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .chat-input {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        outline: none;
+        transition: border-color 0.2s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .chat-input:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    .chat-send-btn {
+        padding: 0.75rem 1.25rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .chat-send-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    }
+
+    .chat-send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .typing-indicator {
+        display: flex;
+        gap: 4px;
+        padding: 0.5rem 0.25rem;
+    }
+
+    .typing-dot {
+        width: 7px;
+        height: 7px;
+        background: #9ca3af;
+        border-radius: 50%;
+        animation: typingBounce 1.2s infinite;
+    }
+
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typingBounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-6px); }
+    }
+
+    /* ── Ticket Form ──────────────────────────────────────────── */
+    .ticket-tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .ticket-tab {
+        flex: 1;
+        padding: 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        background: white;
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+    .ticket-tab.active {
+        border-color: #6366f1;
+        color: #4f46e5;
+        background: #ede9fe;
+    }
+
+    .ticket-section {
+        display: none;
+    }
+
+    .ticket-section.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .hd-label {
+        font-weight: 600;
+        font-size: 0.875rem;
+        color: #374151;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    .hd-input, .hd-textarea, .hd-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color 0.2s ease;
+        color: #1f2937;
+        background: white;
+    }
+
+    .hd-input:focus, .hd-textarea:focus {
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+    }
+
+    .hd-textarea {
+        resize: vertical;
+        min-height: 110px;
+    }
+
+    .hd-submit-btn {
+        width: 100%;
+        padding: 0.9rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-top: 1rem;
+    }
+
+    .hd-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(99,102,241,0.35);
+    }
+
+    .hd-submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .field-group {
+        margin-bottom: 1rem;
+    }
+
+    .error-msg {
+        color: #ef4444;
+        font-size: 0.8rem;
+        margin-top: 0.3rem;
+        display: none;
+    }
+
+    /* ── Ticket Result ────────────────────────────────────────── */
+    .ticket-result {
+        display: none;
+        margin-top: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+    }
+
+    .ticket-result.success {
+        background: #f0fdf4;
+        border: 1px solid #86efac;
+        color: #166534;
+    }
+
+    .ticket-result.error {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+    }
+
+    .ticket-id-display {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #4f46e5;
+        letter-spacing: 1px;
+        display: block;
+        margin: 0.5rem 0;
+    }
+
+    /* ── Status Badge ─────────────────────────────────────────── */
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.9rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-open { background: #dbeafe; color: #1d4ed8; }
+    .status-in-progress { background: #fef9c3; color: #92400e; }
+    .status-resolved { background: #dcfce7; color: #166534; }
+
+    .ticket-detail-card {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .ticket-detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 0.875rem;
+    }
+
+    .ticket-detail-row:last-child {
+        border-bottom: none;
+    }
+
+    .td-label {
+        color: #6b7280;
+        font-weight: 500;
+        min-width: 120px;
+    }
+
+    .td-value {
+        color: #1f2937;
+        font-weight: 600;
+        text-align: right;
+        flex: 1;
+    }
+
+    /* ── Floating Button ──────────────────────────────────────── */
+    .helpdesk-fab {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        width: 58px;
+        height: 58px;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.4rem;
+        box-shadow: 0 6px 25px rgba(99,102,241,0.45);
+        z-index: 1050;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .helpdesk-fab:hover {
+        transform: scale(1.1) translateY(-3px);
+        box-shadow: 0 10px 35px rgba(99,102,241,0.55);
+    }
+
+    .fab-pulse {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(99,102,241,0.4);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 0.7; }
+        100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    /* ── Mini Popup ───────────────────────────────────────────── */
+    .hd-popup {
+        position: fixed;
+        bottom: 6rem;
+        right: 2rem;
+        width: 370px;
+        max-height: 580px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        z-index: 1049;
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+        animation: popupSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .hd-popup.open {
+        display: flex;
+    }
+
+    @keyframes popupSlideIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .popup-header {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        padding: 1rem 1.25rem;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+    }
+
+    .popup-header h6 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 1rem;
+    }
+
+    .popup-header small {
+        opacity: 0.8;
+        font-size: 0.75rem;
+    }
+
+    .popup-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+
+    .popup-close:hover {
+        background: rgba(255,255,255,0.35);
+    }
+
+    .popup-tabs {
+        display: flex;
+        border-bottom: 1px solid #e5e7eb;
+        flex-shrink: 0;
+    }
+
+    .popup-tab {
+        flex: 1;
+        padding: 0.7rem 0.5rem;
+        border: none;
+        background: transparent;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+
+    .popup-tab.active {
+        color: #4f46e5;
+        border-bottom-color: #4f46e5;
+        background: #f5f3ff;
+    }
+
+    .popup-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1rem;
+    }
+
+    .popup-body::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .popup-body::-webkit-scrollbar-thumb {
+        background: #d1d5db;
+        border-radius: 2px;
+    }
+
+    .popup-tab-content {
+        display: none;
+    }
+
+    .popup-tab-content.active {
+        display: block;
+        animation: fadeIn 0.25s ease;
+    }
+
+    .popup-footer {
+        padding: 0.6rem 1rem;
+        background: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .popup-footer a {
+        font-size: 0.78rem;
+        color: #6366f1;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .popup-footer a:hover {
+        text-decoration: underline;
+    }
+
+    /* Popup FAQ */
+    .popup-faq-item {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+    }
+
+    .popup-faq-q {
+        width: 100%;
+        padding: 0.7rem 0.9rem;
+        background: #f9fafb;
+        border: none;
+        text-align: left;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: #1f2937;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .popup-faq-q.open {
+        background: #ede9fe;
+        color: #4f46e5;
+    }
+
+    .popup-faq-a {
+        display: none;
+        padding: 0.6rem 0.9rem;
+        font-size: 0.8rem;
+        color: #4b5563;
+        line-height: 1.6;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .popup-faq-a.open {
+        display: block;
+    }
+
+    /* Popup Chat */
+    .popup-chat-window {
+        height: 220px;
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        padding: 0.75rem;
+        background: #f9fafb;
+        margin-bottom: 0.75rem;
+        scroll-behavior: smooth;
+    }
+
+    .popup-chat-input-row {
+        display: flex;
+        gap: 0.4rem;
+    }
+
+    .popup-chat-input {
+        flex: 1;
+        padding: 0.6rem 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        outline: none;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .popup-chat-input:focus {
+        border-color: #6366f1;
+    }
+
+    .popup-chat-btn {
+        padding: 0.6rem 0.9rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .popup-chat-btn:hover {
+        transform: translateY(-1px);
+    }
+
+    .popup-chat-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Popup Ticket */
+    .popup-field {
+        margin-bottom: 0.75rem;
+    }
+
+    .popup-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.3rem;
+        display: block;
+    }
+
+    .popup-input, .popup-textarea {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-family: 'Inter', sans-serif;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+
+    .popup-input:focus, .popup-textarea:focus {
+        border-color: #6366f1;
+    }
+
+    .popup-textarea {
+        resize: none;
+        height: 70px;
+    }
+
+    .popup-submit-btn {
+        width: 100%;
+        padding: 0.7rem;
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .popup-submit-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+    }
+
+    .popup-submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .popup-result {
+        display: none;
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.82rem;
+    }
+
+    .popup-result.success {
+        background: #f0fdf4;
+        border: 1px solid #86efac;
+        color: #166534;
+    }
+
+    .popup-result.error {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+        color: #991b1b;
+    }
+
+    .popup-ticket-id {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #4f46e5;
+        letter-spacing: 1px;
+        display: block;
+        margin: 0.25rem 0;
+    }
+
+    @media (max-width: 480px) {
+        .hd-popup {
+            width: calc(100vw - 2rem);
+            right: 1rem;
+            bottom: 5rem;
+        }
+
+        .helpdesk-fab {
+            right: 1rem;
+            bottom: 1.5rem;
+        }
+    }
+</style>
+
+<div class="helpdesk-wrapper">
+    <div class="container">
+        <div class="helpdesk-header">
+            <h1><i class="bi bi-headset me-2"></i>Help Desk</h1>
+            <p>Find answers, chat with our assistant, or submit a support ticket</p>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="hd-tabs">
+            <button class="hd-tab active" onclick="switchTab('faq')">
+                <i class="bi bi-patch-question"></i> FAQ
+            </button>
+            <button class="hd-tab" onclick="switchTab('chatbot')">
+                <i class="bi bi-robot"></i> AI Assistant
+            </button>
+            <button class="hd-tab" onclick="switchTab('ticket')">
+                <i class="bi bi-ticket-perforated"></i> Support Ticket
+            </button>
+        </div>
+
+        <!-- FAQ Tab -->
+        <div class="hd-tab-content active" id="tab-faq">
+            <div class="hd-card">
+                <h5 class="fw-bold mb-4"><i class="bi bi-patch-question-fill text-primary me-2"></i>Frequently Asked Questions</h5>
+                <div id="faq-list">
+                    {% for faq in faqs %}
+                    <div class="faq-item">
+                        <button class="faq-question" onclick="toggleFaq(this)">
+                            <span>{{ faq.question }}</span>
+                            <i class="bi bi-plus faq-icon"></i>
+                        </button>
+                        <div class="faq-answer">{{ faq.answer }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot Tab -->
+        <div class="hd-tab-content" id="tab-chatbot">
+            <div class="hd-card">
+                <h5 class="fw-bold mb-1"><i class="bi bi-robot text-primary me-2"></i>AI Support Assistant</h5>
+                <p class="text-muted small mb-3">Ask anything about CrediPredict. I can only answer questions related to this platform.</p>
+
+                <div class="chat-window" id="main-chat-window">
+                    <div class="chat-msg bot">
+                        <div class="chat-avatar bot">AI</div>
+                        <div class="chat-bubble">Hello! I'm the CrediPredict support assistant. Ask me anything about credit assessments, your results, how to use the platform, or how to submit a ticket. 😊</div>
+                    </div>
+                </div>
+
+                <div class="chat-input-row">
+                    <input type="text" class="chat-input" id="main-chat-input" placeholder="Type your question..." onkeydown="if(event.key==='Enter') sendMainChat()">
+                    <button class="chat-send-btn" id="main-chat-btn" onclick="sendMainChat()">
+                        <i class="bi bi-send"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ticket Tab -->
+        <div class="hd-tab-content" id="tab-ticket">
+            <div class="hd-card">
+                <h5 class="fw-bold mb-1"><i class="bi bi-ticket-perforated-fill text-primary me-2"></i>Support Tickets</h5>
+                <p class="text-muted small mb-3">Submit a ticket or check your existing ticket status.</p>
+
+                <div class="ticket-tabs">
+                    <button class="ticket-tab active" onclick="switchTicketTab('submit')">
+                        <i class="bi bi-send me-1"></i>Submit Ticket
+                    </button>
+                    <button class="ticket-tab" onclick="switchTicketTab('view')">
+                        <i class="bi bi-search me-1"></i>View Ticket Status
+                    </button>
+                </div>
+
+                <!-- Submit Ticket -->
+                <div class="ticket-section active" id="section-submit">
+                    <div class="field-group">
+                        <label class="hd-label">Email Address *</label>
+                        <input type="email" class="hd-input" id="t-email" placeholder="your@email.com">
+                        <div class="error-msg" id="err-email"></div>
+                    </div>
+                    <div class="field-group">
+                        <label class="hd-label">Subject *</label>
+                        <input type="text" class="hd-input" id="t-subject" placeholder="Brief description of your issue">
+                        <div class="error-msg" id="err-subject"></div>
+                    </div>
+                    <div class="field-group">
+                        <label class="hd-label">Description *</label>
+                        <textarea class="hd-textarea" id="t-description" placeholder="Describe your issue in detail (minimum 20 characters)"></textarea>
+                        <div class="error-msg" id="err-desc"></div>
+                    </div>
+                    <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Maximum 2 tickets per hour per email address.</small>
+                    <button class="hd-submit-btn" id="submit-ticket-btn" onclick="submitTicket()">
+                        <i class="bi bi-send me-2"></i>Submit Ticket
+                    </button>
+                    <div class="ticket-result" id="submit-result"></div>
+
+                    <!-- Saved Tickets from Browser -->
+                    <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid #e5e7eb;">
+                        <div style="font-size:0.8rem; font-weight:700; color:#374151; margin-bottom:0.75rem;">
+                            <i class="bi bi-bookmark me-1" style="color:#6366f1;"></i>Your Tickets (Saved in Browser)
+                        </div>
+                        <div id="saved-tickets-list"></div>
+                    </div>
+                </div>
+
+                <!-- View Ticket -->
+                <div class="ticket-section" id="section-view">
+                    <div class="field-group">
+                        <label class="hd-label">Ticket ID *</label>
+                        <input type="text" class="hd-input" id="v-ticket-id" placeholder="e.g. RIQ-2026-AB34X" style="text-transform: uppercase;">
+                        <div class="error-msg" id="err-tid"></div>
+                    </div>
+                    <div class="field-group">
+                        <label class="hd-label">Email Address *</label>
+                        <input type="email" class="hd-input" id="v-email" placeholder="Email used when submitting ticket">
+                        <div class="error-msg" id="err-vemail"></div>
+                    </div>
+                    <button class="hd-submit-btn" id="view-ticket-btn" onclick="viewTicket()">
+                        <i class="bi bi-search me-2"></i>Check Ticket Status
+                    </button>
+                    <div class="ticket-result" id="view-result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Floating Button ──────────────────────────────── -->
+<button class="helpdesk-fab" id="fab-btn" onclick="togglePopup()" title="Help Desk">
+    <div class="fab-pulse"></div>
+    <i class="bi bi-headset" id="fab-icon"></i>
+</button>
+
+<!-- ── Mini Popup ───────────────────────────────────── -->
+<div class="hd-popup" id="hd-popup">
+    <div class="popup-header">
+        <div>
+            <h6><i class="bi bi-headset me-2"></i>CrediPredict Support</h6>
+            <small>We're here to help</small>
+        </div>
+        <button class="popup-close" onclick="togglePopup()"><i class="bi bi-x"></i></button>
+    </div>
+
+    <div class="popup-tabs">
+        <button class="popup-tab active" onclick="switchPopupTab('p-faq')"><i class="bi bi-patch-question me-1"></i>FAQ</button>
+        <button class="popup-tab" onclick="switchPopupTab('p-chat')"><i class="bi bi-robot me-1"></i>Chat</button>
+        <button class="popup-tab" onclick="switchPopupTab('p-ticket')"><i class="bi bi-ticket me-1"></i>Ticket</button>
+    </div>
+
+    <div class="popup-body">
+        <!-- Popup FAQ -->
+        <div class="popup-tab-content active" id="p-faq">
+            {% for faq in faqs[:5] %}
+            <div class="popup-faq-item">
+                <button class="popup-faq-q" onclick="togglePopupFaq(this)">
+                    <span>{{ faq.question }}</span>
+                    <i class="bi bi-plus" style="flex-shrink:0; transition: transform 0.3s;"></i>
+                </button>
+                <div class="popup-faq-a">{{ faq.answer }}</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Popup Chat -->
+        <div class="popup-tab-content" id="p-chat">
+            <div class="popup-chat-window" id="popup-chat-window">
+                <div class="chat-msg bot">
+                    <div class="chat-avatar bot">AI</div>
+                    <div class="chat-bubble" style="font-size:0.82rem;">Hi! Ask me anything about CrediPredict. 😊</div>
+                </div>
+            </div>
+            <div class="popup-chat-input-row">
+                <input type="text" class="popup-chat-input" id="popup-chat-input" placeholder="Ask a question..." onkeydown="if(event.key==='Enter') sendPopupChat()">
+                <button class="popup-chat-btn" id="popup-chat-btn" onclick="sendPopupChat()">
+                    <i class="bi bi-send"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Popup Ticket -->
+        <div class="popup-tab-content" id="p-ticket">
+            <div class="popup-field">
+                <label class="popup-label">Email *</label>
+                <input type="email" class="popup-input" id="p-email" placeholder="your@email.com">
+            </div>
+            <div class="popup-field">
+                <label class="popup-label">Subject *</label>
+                <input type="text" class="popup-input" id="p-subject" placeholder="Brief issue description">
+            </div>
+            <div class="popup-field">
+                <label class="popup-label">Description *</label>
+                <textarea class="popup-textarea" id="p-desc" placeholder="Describe your issue..."></textarea>
+            </div>
+            <small class="text-muted" style="font-size:0.75rem;"><i class="bi bi-info-circle me-1"></i>Max 2 tickets/hour per email.</small>
+            <button class="popup-submit-btn mt-2" id="popup-submit-btn" onclick="submitPopupTicket()">
+                <i class="bi bi-send me-1"></i>Submit Ticket
+            </button>
+            <div class="popup-result" id="popup-result"></div>
+        </div>
+    </div>
+
+    <div class="popup-footer">
+        <a href="{{ url_for('helpdesk.helpdesk_page') }}"><i class="bi bi-box-arrow-up-right me-1"></i>Open Full Help Desk Page</a>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ── Tab Switching ──────────────────────────────────────────────────────────────
+function switchTab(tab) {
+    document.querySelectorAll('.hd-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['faq','chatbot','ticket'][i] === tab);
+    });
+    document.querySelectorAll('.hd-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function switchTicketTab(tab) {
+    document.querySelectorAll('.ticket-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['submit','view'][i] === tab);
+    });
+    document.querySelectorAll('.ticket-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('section-' + tab).classList.add('active');
+}
+
+// ── FAQ Toggle ─────────────────────────────────────────────────────────────────
+function toggleFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const isOpen = btn.classList.contains('open');
+    document.querySelectorAll('.faq-question').forEach(q => {
+        q.classList.remove('open');
+        q.nextElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+        btn.classList.add('open');
+        answer.classList.add('open');
+    }
+}
+
+// ── Popup ──────────────────────────────────────────────────────────────────────
+function togglePopup() {
+    const popup = document.getElementById('hd-popup');
+    const icon = document.getElementById('fab-icon');
+    popup.classList.toggle('open');
+    icon.className = popup.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-headset';
+}
+
+function switchPopupTab(tab) {
+    document.querySelectorAll('.popup-tab').forEach((t, i) => {
+        t.classList.toggle('active', ['p-faq','p-chat','p-ticket'][i] === tab);
+    });
+    document.querySelectorAll('.popup-tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(tab).classList.add('active');
+}
+
+function togglePopupFaq(btn) {
+    const answer = btn.nextElementSibling;
+    const icon = btn.querySelector('i');
+    const isOpen = btn.classList.contains('open');
+    document.querySelectorAll('.popup-faq-q').forEach(q => {
+        q.classList.remove('open');
+        q.querySelector('i').style.transform = 'rotate(0deg)';
+        q.nextElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+        btn.classList.add('open');
+        icon.style.transform = 'rotate(45deg)';
+        answer.classList.add('open');
+    }
+}
+
+// ── Chat Helpers ───────────────────────────────────────────────────────────────
+function appendMessage(windowId, role, text) {
+    const win = document.getElementById(windowId);
+    const isBot = role === 'bot';
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + role;
+    div.innerHTML = `
+        <div class="chat-avatar ${isBot ? 'bot' : 'user-av'}">${isBot ? 'AI' : 'You'}</div>
+        <div class="chat-bubble">${text}</div>
+    `;
+    win.appendChild(div);
+    win.scrollTop = win.scrollHeight;
+}
+
+function showTyping(windowId) {
+    const win = document.getElementById(windowId);
+    const div = document.createElement('div');
+    div.className = 'chat-msg bot';
+    div.id = windowId + '-typing';
+    div.innerHTML = `
+        <div class="chat-avatar bot">AI</div>
+        <div class="chat-bubble">
+            <div class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+        </div>
+    `;
+    win.appendChild(div);
+    win.scrollTop = win.scrollHeight;
+}
+
+function removeTyping(windowId) {
+    const el = document.getElementById(windowId + '-typing');
+    if (el) el.remove();
+}
+
+async function sendChat(inputId, windowId, btnId) {
+    const input = document.getElementById(inputId);
+    const btn = document.getElementById(btnId);
+    const msg = input.value.trim();
+    if (!msg) return;
+    input.value = '';
+    btn.disabled = true;
+    appendMessage(windowId, 'user', msg);
+    showTyping(windowId);
+
+    // Minimum typing delay so it feels like a real chat (1.2s - 2s)
+    const minDelay = 1200;
+    const startTime = Date.now();
+
+    try {
+        const res = await fetch('/api/helpdesk/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: msg})
+        });
+        const data = await res.json();
+
+        // Wait remaining time if response came too fast
+        const elapsed = Date.now() - startTime;
+        if (elapsed < minDelay) {
+            await new Promise(r => setTimeout(r, minDelay - elapsed));
+        }
+
+        removeTyping(windowId);
+        appendMessage(windowId, 'bot', data.response || 'Sorry, I could not process that.');
+    } catch (e) {
+        await new Promise(r => setTimeout(r, minDelay));
+        removeTyping(windowId);
+        appendMessage(windowId, 'bot', 'Connection error. Please try again.');
+    }
+    btn.disabled = false;
+    input.focus();
+}
+
+function sendMainChat() { sendChat('main-chat-input', 'main-chat-window', 'main-chat-btn'); }
+function sendPopupChat() { sendChat('popup-chat-input', 'popup-chat-window', 'popup-chat-btn'); }
+
+// ── Submit Ticket ──────────────────────────────────────────────────────────────
+async function submitTicket() {
+    const email = document.getElementById('t-email').value.trim();
+    const subject = document.getElementById('t-subject').value.trim();
+    const desc = document.getElementById('t-description').value.trim();
+    const btn = document.getElementById('submit-ticket-btn');
+    const resultDiv = document.getElementById('submit-result');
+
+    // Clear errors
+    ['err-email','err-subject','err-desc'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+    });
+
+    let valid = true;
+    if (!email) { showError('err-email', 'Email is required'); valid = false; }
+    if (!subject || subject.length < 5) { showError('err-subject', 'Subject must be at least 5 characters'); valid = false; }
+    if (!desc || desc.length < 20) { showError('err-desc', 'Description must be at least 20 characters'); valid = false; }
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Submitting...';
+
+    try {
+        const res = await fetch('/api/helpdesk/submit_ticket', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, subject, description: desc})
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            // Save to localStorage so user can retrieve even after refresh
+            const saved = JSON.parse(localStorage.getItem('credipredict_tickets') || '[]');
+            saved.unshift({ id: data.ticket_id, email: email, date: new Date().toLocaleString() });
+            localStorage.setItem('credipredict_tickets', JSON.stringify(saved.slice(0, 10)));
+
+            resultDiv.className = 'ticket-result success';
+            resultDiv.innerHTML = `
+                <div><strong>✅ Ticket Submitted Successfully!</strong></div>
+                <div class="mt-2">Your Ticket ID:</div>
+                <span class="ticket-id-display" id="generated-tid">${data.ticket_id}</span>
+                <button onclick="copyTicketId('${data.ticket_id}')" style="margin-top:0.5rem; padding:0.35rem 0.9rem; background:#4f46e5; color:white; border:none; border-radius:7px; font-size:0.8rem; cursor:pointer; display:block;">📋 Copy Ticket ID</button>
+                <div class="mt-2" style="font-size:0.82rem; color:#166534;">Your ticket ID is also saved in this browser. Use "View Ticket Status" to check it anytime.</div>
+            `;
+            resultDiv.style.display = 'block';
+            document.getElementById('t-email').value = '';
+            document.getElementById('t-subject').value = '';
+            document.getElementById('t-description').value = '';
+            renderSavedTickets();
+        } else {
+            resultDiv.className = 'ticket-result error';
+            resultDiv.innerHTML = `❌ ${data.error}`;
+            resultDiv.style.display = 'block';
+        }
+    } catch (e) {
+        resultDiv.className = 'ticket-result error';
+        resultDiv.innerHTML = '❌ Connection error. Please try again.';
+        resultDiv.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Ticket';
+}
+
+// ── View Ticket ────────────────────────────────────────────────────────────────
+async function viewTicket() {
+    const ticketId = document.getElementById('v-ticket-id').value.trim().toUpperCase();
+    const email = document.getElementById('v-email').value.trim();
+    const btn = document.getElementById('view-ticket-btn');
+    const resultDiv = document.getElementById('view-result');
+
+    ['err-tid','err-vemail'].forEach(id => document.getElementById(id).style.display = 'none');
+
+    let valid = true;
+    if (!ticketId) { showError('err-tid', 'Ticket ID is required'); valid = false; }
+    if (!email) { showError('err-vemail', 'Email is required'); valid = false; }
+    if (!valid) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Searching...';
+
+    try {
+        const res = await fetch('/api/helpdesk/view_ticket', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ticket_id: ticketId, email})
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            const t = data.ticket;
+            const statusClass = {
+                'Open': 'status-open',
+                'In Progress': 'status-in-progress',
+                'Resolved': 'status-resolved'
+            }[t.status] || 'status-open';
+
+            resultDiv.className = 'ticket-result success';
+            resultDiv.innerHTML = `
+                <strong>Ticket Found</strong>
+                <div class="ticket-detail-card">
+                    <div class="ticket-detail-row">
+                        <span class="td-label">Ticket ID</span>
+                        <span class="td-value" style="color:#4f46e5; font-family: monospace;">${t.ticket_id}</span>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <span class="td-label">Status</span>
+                        <span class="td-value"><span class="status-badge ${statusClass}">${t.status}</span></span>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <span class="td-label">Subject</span>
+                        <span class="td-value">${t.subject}</span>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <span class="td-label">Submitted</span>
+                        <span class="td-value">${t.created_at}</span>
+                    </div>
+                    <div class="ticket-detail-row">
+                        <span class="td-label">Last Updated</span>
+                        <span class="td-value">${t.updated_at}</span>
+                    </div>
+                    ${t.admin_reply ? `
+                    <div class="ticket-detail-row" style="flex-direction: column; gap: 0.5rem;">
+                        <span class="td-label">Admin Reply</span>
+                        <div style="background: #ede9fe; padding: 0.75rem; border-radius: 8px; color: #4f46e5; font-size: 0.875rem; width: 100%;">${t.admin_reply}</div>
+                    </div>` : ''}
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        } else {
+            resultDiv.className = 'ticket-result error';
+            resultDiv.innerHTML = `❌ ${data.error}`;
+            resultDiv.style.display = 'block';
+        }
+    } catch (e) {
+        resultDiv.className = 'ticket-result error';
+        resultDiv.innerHTML = '❌ Connection error. Please try again.';
+        resultDiv.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-search me-2"></i>Check Ticket Status';
+}
+
+// ── Popup Ticket ───────────────────────────────────────────────────────────────
+async function submitPopupTicket() {
+    const email = document.getElementById('p-email').value.trim();
+    const subject = document.getElementById('p-subject').value.trim();
+    const desc = document.getElementById('p-desc').value.trim();
+    const btn = document.getElementById('popup-submit-btn');
+    const resultDiv = document.getElementById('popup-result');
+
+    if (!email || !subject || !desc) {
+        resultDiv.className = 'popup-result error';
+        resultDiv.innerHTML = '❌ All fields are required.';
+        resultDiv.style.display = 'block';
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i>Submitting...';
+
+    try {
+        const res = await fetch('/api/helpdesk/submit_ticket', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, subject, description: desc})
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            resultDiv.className = 'popup-result success';
+            resultDiv.innerHTML = `✅ Ticket submitted!<br><span class="popup-ticket-id">${data.ticket_id}</span><span style="font-size:0.75rem;">Save this ID to track status.</span>`;
+            resultDiv.style.display = 'block';
+            document.getElementById('p-email').value = '';
+            document.getElementById('p-subject').value = '';
+            document.getElementById('p-desc').value = '';
+        } else {
+            resultDiv.className = 'popup-result error';
+            resultDiv.innerHTML = `❌ ${data.error}`;
+            resultDiv.style.display = 'block';
+        }
+    } catch (e) {
+        resultDiv.className = 'popup-result error';
+        resultDiv.innerHTML = '❌ Connection error.';
+        resultDiv.style.display = 'block';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send me-1"></i>Submit Ticket';
+}
+
+function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = 'block';
+}
+
+// ── Copy Ticket ID ─────────────────────────────────────────────────────────────
+function copyTicketId(id) {
+    navigator.clipboard.writeText(id).then(() => {
+        const btn = event.target;
+        btn.textContent = '✅ Copied!';
+        setTimeout(() => { btn.textContent = '📋 Copy Ticket ID'; }, 2000);
+    });
+}
+
+// ── Saved Tickets from localStorage ───────────────────────────────────────────
+function renderSavedTickets() {
+    const saved = JSON.parse(localStorage.getItem('credipredict_tickets') || '[]');
+    const container = document.getElementById('saved-tickets-list');
+    if (!container) return;
+    if (saved.length === 0) {
+        container.innerHTML = '<p style="font-size:0.82rem; color:#6b7280; text-align:center; padding:1rem;">No saved tickets in this browser.</p>';
+        return;
+    }
+    container.innerHTML = saved.map(t => `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.75rem; background:#f9fafb; border-radius:8px; margin-bottom:0.5rem; border:1px solid #e5e7eb;">
+            <div>
+                <span style="font-family:monospace; font-weight:700; color:#4f46e5; font-size:0.85rem;">${t.id}</span>
+                <div style="font-size:0.72rem; color:#6b7280; margin-top:0.1rem;">${t.date}</div>
+            </div>
+            <button onclick="prefillViewTicket('${t.id}', '${t.email}')"
+                style="padding:0.3rem 0.7rem; background:#6366f1; color:white; border:none; border-radius:6px; font-size:0.75rem; cursor:pointer;">
+                View Status
+            </button>
+        </div>
+    `).join('');
+}
+
+function prefillViewTicket(id, email) {
+    switchTab('ticket');
+    switchTicketTab('view');
+    document.getElementById('v-ticket-id').value = id;
+    document.getElementById('v-email').value = email;
+}
+
+// Initialize saved tickets on page load
+document.addEventListener('DOMContentLoaded', renderSavedTickets);
+
+// Close popup when clicking outside
+document.addEventListener('click', function(e) {
+    const popup = document.getElementById('hd-popup');
+    const fab = document.getElementById('fab-btn');
+    if (popup.classList.contains('open') && !popup.contains(e.target) && !fab.contains(e.target)) {
+        togglePopup();
+    }
+});
+</script>
+{% endblock %}
